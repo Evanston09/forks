@@ -7,15 +7,11 @@ Title: Door with frame
 */
 import { useGLTF } from '@react-three/drei';
 import type { ThreeElements } from '@react-three/fiber';
-import { forwardRef, useEffect, useImperativeHandle } from 'react';
+import { useEffect } from 'react';
 import type * as THREE from 'three';
 import type { GLTF } from 'three-stdlib';
 
-type DoorProps = Omit<ThreeElements['group'], 'opacity'>;
-
-export type DoorHandle = {
-    setOpacity: (value: number) => void;
-};
+type DoorProps = ThreeElements['group'] & { opacity?: number };
 
 type GLTFResult = GLTF & {
     nodes: {
@@ -32,8 +28,10 @@ type GLTFResult = GLTF & {
     };
 };
 
-const Door = forwardRef<DoorHandle, DoorProps>(function Door(props, ref) {
-    const { nodes, materials } = useGLTF('/door_with_frame.glb') as unknown as GLTFResult;
+export default function Door({ opacity = 1, ...props }: DoorProps) {
+    const { nodes, materials } = useGLTF(
+        '/door_with_frame.glb',
+    ) as unknown as GLTFResult;
 
     useEffect(() => {
         Object.values(materials).forEach((mat) => {
@@ -41,13 +39,11 @@ const Door = forwardRef<DoorHandle, DoorProps>(function Door(props, ref) {
         });
     }, [materials]);
 
-    useImperativeHandle(ref, () => ({
-        setOpacity(value: number) {
-            Object.values(materials).forEach((mat) => {
-                mat.opacity = value;
-            });
-        },
-    }), [materials]);
+    useEffect(() => {
+        Object.values(materials).forEach((mat) => {
+            mat.opacity = opacity;
+        });
+    }, [materials, opacity]);
 
     return (
         <group {...props} dispose={null}>
@@ -95,8 +91,6 @@ const Door = forwardRef<DoorHandle, DoorProps>(function Door(props, ref) {
             </group>
         </group>
     );
-});
-
-export default Door;
+}
 
 useGLTF.preload('/door_with_frame.glb');

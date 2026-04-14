@@ -5,11 +5,11 @@ import {
     useScroll,
 } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { Group, RectAreaLight } from 'three';
 import { MathUtils } from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Door, { type DoorHandle } from '@/models/door';
+import Door from '@/models/door';
 import Fork from '@/models/fork';
 import ScrambleText from '@/models/scramble-text';
 
@@ -18,9 +18,9 @@ const DAMP = 8; // tweak this to adjust all damping globally
 export default function MainScene() {
     const forkRef = useRef<Group>(null!);
     const rectLightRef = useRef<RectAreaLight>(null!);
-    const doorRef = useRef<DoorHandle>(null);
     const scroll = useScroll();
     const isMobile = useIsMobile();
+    const [doorOpacity, setDoorOpacity] = useState(1);
 
     useFrame((state, delta) => {
         const r1 = scroll.range(0, 2 / 9);
@@ -53,7 +53,7 @@ export default function MainScene() {
         const targetRotX = (Math.PI / 2) * r2;
 
         const fade = 1 - r2;
-        doorRef.current?.setOpacity(fade);
+        setDoorOpacity(fade);
         rectLightRef.current.intensity = 18 * fade;
 
         forkRef.current.position.z = MathUtils.damp(
@@ -130,9 +130,9 @@ export default function MainScene() {
             <fog attach="fog" args={['#0a0a0a', 5, 30]} />
 
             <Door
-                ref={doorRef}
                 rotation={[Math.PI / 2, Math.PI, 0]}
                 position={[0, -2.9, 0]}
+                opacity={doorOpacity}
             />
             <group ref={forkRef} position={[0, -3, -1.25]}>
                 <Fork />

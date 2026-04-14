@@ -10,7 +10,7 @@ import {
     Sword,
     Users,
 } from 'lucide-react';
-import { useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import {
     Card,
     CardAction,
@@ -64,6 +64,13 @@ function getGreetingDetails(hour: number) {
     return { message: 'Good evening', icon: MoonStar };
 }
 
+function getCurrentGreetingDetails() {
+    if (typeof window === 'undefined') {
+        return getGreetingDetails(12);
+    }
+
+    return getGreetingDetails(new Date().getHours());
+}
 
 function StatCard({
     title,
@@ -136,12 +143,7 @@ function SuperlativeCard({
 
 export default function Dashboard({ summary, superlatives }: DashboardProps) {
     const { auth } = usePage().props;
-    const hour = useSyncExternalStore(
-        () => () => {},
-        () => new Date().getHours(),
-        () => 12,
-    );
-    const greeting = getGreetingDetails(hour);
+    const [greeting] = useState(getCurrentGreetingDetails);
 
     const GreetingIcon = greeting.icon;
 

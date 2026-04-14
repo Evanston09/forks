@@ -74,6 +74,8 @@ class TargetController extends Controller
                 $player->current_target_id = $players[($index + 1) % $players->count()]->id;
             });
 
+            // Sort by id before saving to ensure a consistent lock acquisition order,
+            // preventing deadlocks when concurrent requests update the same rows.
             $players->sortBy('id')->each(fn ($player) => $player->save());
 
             return back();

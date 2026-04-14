@@ -136,11 +136,12 @@ function SuperlativeCard({
 
 export default function Dashboard({ summary, superlatives }: DashboardProps) {
     const { auth } = usePage().props;
-    const greeting = useSyncExternalStore(
+    const hour = useSyncExternalStore(
         () => () => {},
-        () => getGreetingDetails(new Date().getHours()),
-        () => getGreetingDetails(12),
+        () => new Date().getHours(),
+        () => 12,
     );
+    const greeting = getGreetingDetails(hour);
 
     const GreetingIcon = greeting.icon;
 

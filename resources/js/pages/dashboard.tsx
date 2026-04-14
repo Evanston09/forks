@@ -143,7 +143,7 @@ function SuperlativeCard({
 
 export default function Dashboard({ summary, superlatives }: DashboardProps) {
     const { auth } = usePage().props;
-    const [greeting] = useState(getCurrentGreetingDetails);
+    const greeting = getCurrentGreetingDetails()
 
     const GreetingIcon = greeting.icon;
 

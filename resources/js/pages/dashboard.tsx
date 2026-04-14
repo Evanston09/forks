@@ -10,7 +10,7 @@ import {
     Sword,
     Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Card,
     CardAction,
@@ -136,7 +136,11 @@ function SuperlativeCard({
 
 export default function Dashboard({ summary, superlatives }: DashboardProps) {
     const { auth } = usePage().props;
-    const [greeting] = useState(() => getGreetingDetails(new Date().getHours()));
+    const [greeting, setGreeting] = useState(() => getGreetingDetails(12));
+
+    useEffect(() => {
+        setGreeting(getGreetingDetails(new Date().getHours()));
+    }, []);
 
     const GreetingIcon = greeting.icon;
 

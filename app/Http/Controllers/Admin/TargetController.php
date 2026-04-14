@@ -72,8 +72,9 @@ class TargetController extends Controller
 
             $players->each(function ($player, $index) use ($players) {
                 $player->current_target_id = $players[($index + 1) % $players->count()]->id;
-                $player->save();
             });
+
+            $players->sortBy('id')->each(fn ($player) => $player->save());
 
             return back();
         });

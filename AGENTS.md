@@ -146,8 +146,8 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 # Test Enforcement
 
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Do not write new tests or update existing tests unless the user explicitly asks for tests.
+- Do not run tests as part of routine changes unless the user explicitly asks for verification.
 
 === inertia-laravel/core rules ===
 

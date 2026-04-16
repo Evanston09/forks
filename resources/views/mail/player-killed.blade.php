@@ -15,21 +15,11 @@ Submitted: {{ $submittedAtFormatted ?? 'Recently' }}
 Response deadline: {{ $expiresAtFormatted }}
 </x-mail::panel>
 
-<x-mail::button :url="$approveUrl">
-Approve report
-</x-mail::button>
-
-<x-mail::button :url="$contestUrl">
-Contest report
+<x-mail::button :url="$reviewUrl">
+View Report
 </x-mail::button>
 
 If you do nothing, this report will auto-approve at {{ $expiresAtFormatted }}.
-
-If a button does not work, copy one of these links into your browser:
-
-Approve: {{ $approveUrl }}
-
-Contest: {{ $contestUrl }}
 
 Thanks,<br>
 {{ config('app.name') }}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\KillStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,11 +16,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('killer_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('victim_id')->unique()->constrained('users')->cascadeOnDelete();
-            $table->foreignId('victim_prev_target_id')->nullable()->constrained('users')->restrictOnDelete();
-            $table->boolean('approved')->default(false);
+            $table->enum('status', array_column(KillStatus::cases(), 'value'))
+              ->default(KillStatus::Pending->value);
             $table->boolean('is_ffa')->default(false);
-            $table->boolean('contested')->default(false);
-            $table->text('contest_reason')->nullable()->after('contested');
+            $table->text('contest_reason')->nullable();
             $table->timestamps();
         });
     }

@@ -16,8 +16,6 @@ class PlayerKilled extends Mailable
 
     public function __construct(
         public Kill $kill,
-        public string $approveUrl,
-        public string $contestUrl,
         public CarbonInterface $expiresAt,
     ) {}
 
@@ -42,8 +40,7 @@ class PlayerKilled extends Mailable
                 'victimName' => $this->kill->victim->name,
                 'submittedAtFormatted' => $this->kill->created_at->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A T'),
                 'expiresAtFormatted' => $this->expiresAt->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A T'),
-                'approveUrl' => $this->approveUrl,
-                'contestUrl' => $this->contestUrl,
+                'reviewUrl' => route('targets'),
             ],
         );
     }

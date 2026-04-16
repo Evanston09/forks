@@ -9,7 +9,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KillController;
 use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\StandingsController;
+use App\Mail\PlayerKilled;
+use App\Models\Kill;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -63,4 +67,10 @@ Route::get('/register', function () {
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 
+Route::get('/test-mail', function () {
+    $kill = Kill::first();
+    Mail::to("kang27m@ncssm.edu")->send(new PlayerKilled($kill, Carbon::now()->addHours(6)));
+
+    return 'Sent';
+});
 require __DIR__.'/settings.php';

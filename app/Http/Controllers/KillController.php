@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GameStage;
+use App\Enums\KillStatus;
+use App\Mail\PlayerKilled;
 use App\Models\Game;
 use App\Models\Kill;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,10 +25,7 @@ class KillController extends Controller
         $user = Auth::user()->load(['currentTarget:id,name,nickname', 'killedByUser:id,name,nickname']);
         $game = Game::current();
 
-        $kill = null;
-        if (! $user->alive) {
-            $kill = Kill::with('killer:id,name,nickname')->where('victim_id', $user->id)->first();
-        }
+        $kill = Kill::with('killer:id,name,nickname')->where('victim_id', $user->id)->first();
 
         $alivePlayers = $game->ffa
             ? User::query()->where('alive', true)->where('is_admin', false)->where('id', '!=', $user->id)->get(['id', 'name', 'nickname'])
@@ -79,18 +80,10 @@ class KillController extends Controller
             return back()->withErrors(['victim_id' => 'You cannot eliminate an admin.']);
         }
 
-        $killer->total_kills += 1;
-        $killer->save();
-
-        $victim->alive = false;
-        $victim->killed_by = $killer->id;
-        $victim->current_target_id = null;
-        $victim->save();
-
         Kill::create([
             'killer_id' => $killer->id,
             'victim_id' => $victim->id,
-            'victim_prev_target_id' => null,
+            'status' => KillStatus::Pending,
             'is_ffa' => true,
         ]);
 
@@ -117,20 +110,13 @@ class KillController extends Controller
             return back()->withErrors(['verification_name' => 'Incorrect verification name.']);
         }
 
-        $killer->current_target_id = $victim->current_target_id;
-        $killer->total_kills += 1;
-        $killer->save();
-
-        $victim->alive = false;
-        $victim->killed_by = $killer->id;
-        $victim->current_target_id = null;
-        $victim->save();
-
-        Kill::create([
+        $kill = Kill::create([
             'killer_id' => $killer->id,
             'victim_id' => $victim->id,
-            'victim_prev_target_id' => $victimsTarget->id,
+            'status' => KillStatus::Pending,
         ]);
+
+        Mail::to("kim27e@ncssm.edu")->send(new PlayerKilled($kill, Carbon::now()->addHours(6)));
 
         return back();
     }
@@ -148,7 +134,7 @@ class KillController extends Controller
             return back()->withErrors(['kill' => 'Your kill has been contested and is pending admin review.']);
         }
 
-        $kill->update(['approved' => true]);
+        $kill->update(['status' => KillStatus::Approved]);
 
         return back();
     }
@@ -175,7 +161,7 @@ class KillController extends Controller
         }
 
         $kill->update([
-            'contested' => true,
+            'status' => KillStatus::Contested,
             'contest_reason' => $request->contest_reason,
         ]);
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\KillStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,9 +14,7 @@ class Kill extends Model
     protected $fillable = [
         'killer_id',
         'victim_id',
-        'victim_prev_target_id',
-        'approved',
-        'contested',
+        'status',
         'contest_reason',
         'is_ffa',
     ];
@@ -26,8 +25,7 @@ class Kill extends Model
     protected function casts(): array
     {
         return [
-            'approved' => 'boolean',
-            'contested' => 'boolean',
+            'status' => KillStatus::class,
             'is_ffa' => 'boolean',
         ];
     }
@@ -40,10 +38,5 @@ class Kill extends Model
     public function victim(): BelongsTo
     {
         return $this->belongsTo(User::class, 'victim_id');
-    }
-
-    public function victimPrevTarget(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'victim_prev_target_id');
     }
 }

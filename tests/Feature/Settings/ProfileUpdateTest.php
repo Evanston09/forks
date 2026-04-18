@@ -41,7 +41,6 @@ test('incomplete users can complete their profile', function () {
             'nickname' => 'Night Owl',
             'phone' => '(555) 555-5555',
             'dorm_location' => '3rd North',
-            'grade_year' => 'Junior',
         ]);
 
     $response
@@ -53,7 +52,6 @@ test('incomplete users can complete their profile', function () {
     expect($user->nickname)->toBe('Night Owl');
     expect($user->phone)->toBe('(555) 555-5555');
     expect($user->dorm_location)->toBe('3rd North');
-    expect($user->grade_year)->toBe('Junior');
     expect($user->profile_completed)->toBeTrue();
 });
 
@@ -62,7 +60,6 @@ test('completed users can update their profile information', function () {
         'nickname' => 'Original',
         'phone' => '(111) 111-1111',
         'dorm_location' => '2nd South',
-        'grade_year' => 'Senior',
         'profile_completed' => true,
     ]);
 
@@ -72,7 +69,6 @@ test('completed users can update their profile information', function () {
             'nickname' => 'Updated Nickname',
             'phone' => '(222) 222-2222',
             'dorm_location' => '4th North',
-            'grade_year' => 'Junior',
         ]);
 
     $response
@@ -84,7 +80,6 @@ test('completed users can update their profile information', function () {
     expect($user->nickname)->toBe('Updated Nickname');
     expect($user->phone)->toBe('(222) 222-2222');
     expect($user->dorm_location)->toBe('4th North');
-    expect($user->grade_year)->toBe('Junior');
 });
 
 test('profile update requires the remaining game fields', function () {
@@ -99,7 +94,6 @@ test('profile update requires the remaining game fields', function () {
             'nickname',
             'phone',
             'dorm_location',
-            'grade_year',
         ])
         ->assertRedirect(route('profile.edit'));
 });

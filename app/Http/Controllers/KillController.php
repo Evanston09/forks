@@ -140,7 +140,7 @@ class KillController extends Controller
 
             $kill->loadMissing('victim');
 
-            Mail::to($kill->victim->email)->queue((new PlayerKilled($kill))->afterCommit());
+            Mail::to($kill->victim->email)->send((new PlayerKilled($kill))->afterCommit());
 
             $kill->notification_sent_at = now();
             $kill->save();
@@ -213,7 +213,7 @@ class KillController extends Controller
 
             $kill->loadMissing('victim');
 
-            Mail::to($kill->victim->email)->queue((new PlayerKilled($kill))->afterCommit());
+            Mail::to($kill->victim->email)->send((new PlayerKilled($kill))->afterCommit());
 
             $kill->notification_sent_at = now();
             $kill->save();

@@ -2,8 +2,8 @@ import { Form } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { store as killStore } from '@/actions/App/Http/Controllers/KillController';
-import type { AlivePlayer } from '@/components/targets/types';
 import InputError from '@/components/input-error';
+import type { AlivePlayer } from '@/components/targets/types';
 import { Button } from '@/components/ui/button';
 import {
     Card,

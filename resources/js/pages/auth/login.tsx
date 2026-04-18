@@ -1,8 +1,8 @@
 import { Head, usePage } from '@inertiajs/react';
-import AuthLayout from '@/layouts/auth-layout';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CircleAlertIcon } from 'lucide-react';
 import googleSignIn from '@/assets/sign_in_google.svg';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import AuthLayout from '@/layouts/auth-layout';
 
 export default function Login({ status }: { status?: string }) {
     const { game } = usePage().props;

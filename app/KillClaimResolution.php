@@ -19,15 +19,21 @@ class KillClaimResolution
                 return false;
             }
 
-            $killer = $claim->killer()->firstOrFail();
-            $victim = $claim->victim()->firstOrFail();
+            $killer = $claim->killer;
+            $victim = $claim->victim;
 
-            if ($victim->alive) {
-                $victim->alive = false;
-                $victim->killed_by = $killer->id;
-                $victim->current_target_id = null;
-                $victim->save();
+            if (! $killer || ! $victim) {
+                return false;
             }
+
+            if (! $victim->alive) {
+                return false;
+            }
+
+            $victim->alive = false;
+            $victim->killed_by = $killer->id;
+            $victim->current_target_id = null;
+            $victim->save();
 
             if (! $claim->is_ffa && $killer->current_target_id === $victim->id) {
                 $killer->current_target_id = $claim->victim->currentTarget?->id;

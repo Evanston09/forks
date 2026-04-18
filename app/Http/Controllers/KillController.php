@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -87,90 +88,138 @@ class KillController extends Controller
 
     private function storeFfaKill(Request $request, User $killer): RedirectResponse
     {
-        if ((int) $request->victim_id === $killer->id) {
-            return back()->withErrors(['victim_id' => 'You cannot eliminate yourself.']);
-        }
+        $error = null;
 
-        $victim = User::find($request->victim_id);
+        DB::transaction(function () use ($request, $killer, &$error): void {
+            if ((int) $request->victim_id === $killer->id) {
+                $error = ['victim_id' => 'You cannot eliminate yourself.'];
 
-        if (! $victim || ! $victim->alive) {
-            return back()->withErrors(['victim_id' => 'That player is already eliminated.']);
-        }
+                return;
+            }
 
-        if ($victim->is_admin) {
-            return back()->withErrors(['victim_id' => 'You cannot eliminate an admin.']);
-        }
+            $currentKiller = User::query()->find($killer->id);
+            $victim = User::query()->find((int) $request->victim_id);
 
-        if (Kill::query()
-            ->where('victim_id', $victim->id)
-            ->whereIn('status', $this->unresolvedStatusValues())
-            ->exists()) {
-            return back()->withErrors(['victim_id' => 'That player already has a kill claim awaiting resolution.']);
-        }
+            if (! $currentKiller || ! $currentKiller->alive) {
+                $error = ['victim_id' => 'You are already eliminated.'];
 
-        $kill = Kill::create([
-            'killer_id' => $killer->id,
-            'victim_id' => $victim->id,
-            'status' => KillStatus::Pending,
-            'is_ffa' => true,
-            'expires_at' => now()->addHours(6),
-        ]);
+                return;
+            }
 
-        $kill->loadMissing('victim');
+            if ($this->outgoingClaimFor($currentKiller)) {
+                $error = ['victim_id' => 'You already have a kill claim awaiting resolution.'];
 
-        if ($kill->notification_sent_at === null) {
-            Mail::to($kill->victim->email)->queue(new PlayerKilled($kill));
+                return;
+            }
+
+            if (! $victim || ! $victim->alive) {
+                $error = ['victim_id' => 'That player is already eliminated.'];
+
+                return;
+            }
+
+            if ($victim->is_admin) {
+                $error = ['victim_id' => 'You cannot eliminate an admin.'];
+
+                return;
+            }
+
+            if ($this->victimHasUnresolvedClaim($victim->id)) {
+                $error = ['victim_id' => 'That player already has a kill claim awaiting resolution.'];
+
+                return;
+            }
+
+            $kill = Kill::create([
+                'killer_id' => $currentKiller->id,
+                'victim_id' => $victim->id,
+                'status' => KillStatus::Pending,
+                'is_ffa' => true,
+                'expires_at' => now()->addHours(6),
+            ]);
+
+            $kill->loadMissing('victim');
+
+            Mail::to($kill->victim->email)->queue((new PlayerKilled($kill))->afterCommit());
+
             $kill->notification_sent_at = now();
             $kill->save();
-        }
+        });
 
-        return back();
+        return $error ? back()->withErrors($error) : back();
     }
 
     private function storeNormalKill(Request $request, User $killer): RedirectResponse
     {
-        $victim = $killer->currentTarget;
-        if (! $victim) {
-            return back()->withErrors(['verification_name' => 'You have no target assigned.']);
-        }
+        $error = null;
 
-        if (! $victim->alive) {
-            return back()->withErrors(['verification_name' => 'Your target has already been eliminated.']);
-        }
+        DB::transaction(function () use ($request, $killer, &$error): void {
+            $currentKiller = User::query()->find($killer->id);
 
-        if (Kill::query()
-            ->where('victim_id', $victim->id)
-            ->whereIn('status', $this->unresolvedStatusValues())
-            ->exists()) {
-            return back()->withErrors(['verification_name' => 'Your target already has a kill claim awaiting resolution.']);
-        }
+            if (! $currentKiller || ! $currentKiller->alive) {
+                $error = ['verification_name' => 'You are already eliminated.'];
 
-        $victimsTarget = $victim->currentTarget;
-        if (! $victimsTarget) {
-            return back()->withErrors(['verification_name' => 'Could not verify — target has no next target.']);
-        }
+                return;
+            }
 
-        if (strtolower(trim($request->verification_name)) !== strtolower(trim($victimsTarget->name))) {
-            return back()->withErrors(['verification_name' => 'Incorrect verification name.']);
-        }
+            if ($this->outgoingClaimFor($currentKiller)) {
+                $error = ['verification_name' => 'You already have a kill claim awaiting resolution.'];
 
-        $kill = Kill::create([
-            'killer_id' => $killer->id,
-            'victim_id' => $victim->id,
-            'status' => KillStatus::Pending,
-            'is_ffa' => false,
-            'expires_at' => now()->addHours(6),
-        ]);
+                return;
+            }
 
-        $kill->loadMissing('victim');
+            if (! $currentKiller->current_target_id) {
+                $error = ['verification_name' => 'You have no target assigned.'];
 
-        if ($kill->notification_sent_at === null) {
-            Mail::to($kill->victim->email)->queue(new PlayerKilled($kill));
+                return;
+            }
+
+            $victim = User::query()
+                ->with('currentTarget:id,name')
+                ->find($currentKiller->current_target_id);
+
+            if (! $victim || ! $victim->alive) {
+                $error = ['verification_name' => 'Your target has already been eliminated.'];
+
+                return;
+            }
+
+            if ($this->victimHasUnresolvedClaim($victim->id)) {
+                $error = ['verification_name' => 'Your target already has a kill claim awaiting resolution.'];
+
+                return;
+            }
+
+            $victimsTarget = $victim->currentTarget;
+            if (! $victimsTarget) {
+                $error = ['verification_name' => 'Could not verify — target has no next target.'];
+
+                return;
+            }
+
+            if (strtolower(trim($request->verification_name)) !== strtolower(trim($victimsTarget->name))) {
+                $error = ['verification_name' => 'Incorrect verification name.'];
+
+                return;
+            }
+
+            $kill = Kill::create([
+                'killer_id' => $currentKiller->id,
+                'victim_id' => $victim->id,
+                'status' => KillStatus::Pending,
+                'is_ffa' => false,
+                'expires_at' => now()->addHours(6),
+            ]);
+
+            $kill->loadMissing('victim');
+
+            Mail::to($kill->victim->email)->queue((new PlayerKilled($kill))->afterCommit());
+
             $kill->notification_sent_at = now();
             $kill->save();
-        }
+        });
 
-        return back();
+        return $error ? back()->withErrors($error) : back();
     }
 
     public function approve(KillClaimResolution $resolution): RedirectResponse
@@ -244,6 +293,14 @@ class KillController extends Controller
             ->whereIn('status', $this->unresolvedStatusValues())
             ->latest()
             ->first();
+    }
+
+    private function victimHasUnresolvedClaim(int $victimId): bool
+    {
+        return Kill::query()
+            ->where('victim_id', $victimId)
+            ->whereIn('status', $this->unresolvedStatusValues())
+            ->exists();
     }
 
     /**

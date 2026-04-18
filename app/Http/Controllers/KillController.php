@@ -4,11 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\GameStage;
 use App\Enums\KillStatus;
+use App\KillClaimResolution;
 use App\Mail\PlayerKilled;
 use App\Models\Game;
 use App\Models\Kill;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,16 +24,22 @@ class KillController extends Controller
 
         $user = Auth::user()->load(['currentTarget:id,name,nickname', 'killedByUser:id,name,nickname']);
         $game = Game::current();
+        $incomingClaim = $this->incomingClaimFor($user);
+        $outgoingClaim = $this->outgoingClaimFor($user);
 
-        $kill = Kill::with('killer:id,name,nickname')->where('victim_id', $user->id)->first();
-
-        $alivePlayers = $game->ffa
-            ? User::query()->where('alive', true)->where('is_admin', false)->where('id', '!=', $user->id)->get(['id', 'name', 'nickname'])
+        $alivePlayers = $game->ffa && ! $outgoingClaim
+            ? User::query()
+                ->where('alive', true)
+                ->where('is_admin', false)
+                ->where('id', '!=', $user->id)
+                ->whereNotIn('id', Kill::query()->select('victim_id')->whereIn('status', $this->unresolvedStatusValues()))
+                ->get(['id', 'name', 'nickname'])
             : [];
 
         return Inertia::render('targets', [
-            'target' => $user->currentTarget,
-            'kill' => $kill,
+            'target' => $outgoingClaim ? null : $user->currentTarget,
+            'incoming_claim' => $incomingClaim,
+            'outgoing_claim' => $outgoingClaim,
             'alive_players' => $alivePlayers,
         ]);
     }
@@ -53,19 +59,34 @@ class KillController extends Controller
             return back()->withErrors(['victim_id' => 'You are already eliminated.', 'verification_name' => 'You are already eliminated.']);
         }
 
+        if ($this->outgoingClaimFor($killer)) {
+            return back()->withErrors([
+                'victim_id' => 'You already have a kill claim awaiting resolution.',
+                'verification_name' => 'You already have a kill claim awaiting resolution.',
+            ]);
+        }
+
         if ($game->ffa) {
+            $request->validate([
+                'victim_id' => ['required', 'integer', 'exists:users,id'],
+            ], [
+                'victim_id.required' => 'Choose a player to eliminate.',
+            ]);
+
             return $this->storeFfaKill($request, $killer);
         }
+
+        $request->validate([
+            'verification_name' => ['required', 'string'],
+        ], [
+            'verification_name.required' => 'Enter your target\'s next target\'s full name.',
+        ]);
 
         return $this->storeNormalKill($request, $killer);
     }
 
     private function storeFfaKill(Request $request, User $killer): RedirectResponse
     {
-        $request->validate([
-            'victim_id' => ['required', 'integer', 'exists:users,id'],
-        ]);
-
         if ((int) $request->victim_id === $killer->id) {
             return back()->withErrors(['victim_id' => 'You cannot eliminate yourself.']);
         }
@@ -80,25 +101,48 @@ class KillController extends Controller
             return back()->withErrors(['victim_id' => 'You cannot eliminate an admin.']);
         }
 
-        Kill::create([
+        if (Kill::query()
+            ->where('victim_id', $victim->id)
+            ->whereIn('status', $this->unresolvedStatusValues())
+            ->exists()) {
+            return back()->withErrors(['victim_id' => 'That player already has a kill claim awaiting resolution.']);
+        }
+
+        $kill = Kill::create([
             'killer_id' => $killer->id,
             'victim_id' => $victim->id,
             'status' => KillStatus::Pending,
             'is_ffa' => true,
+            'expires_at' => now()->addHours(6),
         ]);
+
+        $kill->loadMissing('victim');
+
+        if ($kill->notification_sent_at === null) {
+            Mail::to($kill->victim->email)->queue(new PlayerKilled($kill));
+            $kill->notification_sent_at = now();
+            $kill->save();
+        }
 
         return back();
     }
 
     private function storeNormalKill(Request $request, User $killer): RedirectResponse
     {
-        $request->validate([
-            'verification_name' => ['required', 'string'],
-        ]);
-
         $victim = $killer->currentTarget;
         if (! $victim) {
             return back()->withErrors(['verification_name' => 'You have no target assigned.']);
+        }
+
+        if (! $victim->alive) {
+            return back()->withErrors(['verification_name' => 'Your target has already been eliminated.']);
+        }
+
+        if (Kill::query()
+            ->where('victim_id', $victim->id)
+            ->whereIn('status', $this->unresolvedStatusValues())
+            ->exists()) {
+            return back()->withErrors(['verification_name' => 'Your target already has a kill claim awaiting resolution.']);
         }
 
         $victimsTarget = $victim->currentTarget;
@@ -114,57 +158,102 @@ class KillController extends Controller
             'killer_id' => $killer->id,
             'victim_id' => $victim->id,
             'status' => KillStatus::Pending,
+            'is_ffa' => false,
+            'expires_at' => now()->addHours(6),
         ]);
 
-        Mail::to("kim27e@ncssm.edu")->send(new PlayerKilled($kill, Carbon::now()->addHours(6)));
+        $kill->loadMissing('victim');
+
+        if ($kill->notification_sent_at === null) {
+            Mail::to($kill->victim->email)->queue(new PlayerKilled($kill));
+            $kill->notification_sent_at = now();
+            $kill->save();
+        }
 
         return back();
     }
 
-    public function approve(): RedirectResponse
+    public function approve(KillClaimResolution $resolution): RedirectResponse
     {
         $user = Auth::user();
-        if ($user->alive) {
-            return back();
+        if (! $user->alive) {
+            return back()->withErrors(['kill' => 'You have already been eliminated.']);
         }
 
-        $kill = Kill::where('victim_id', $user->id)->firstOrFail();
+        $kill = Kill::query()
+            ->where('victim_id', $user->id)
+            ->where('status', KillStatus::Pending)
+            ->latest()
+            ->first();
 
-        if ($kill->contested) {
-            return back()->withErrors(['kill' => 'Your kill has been contested and is pending admin review.']);
+        if (! $kill) {
+            return back()->withErrors(['kill' => 'No pending kill claim is awaiting your approval.']);
         }
 
-        $kill->update(['status' => KillStatus::Approved]);
+        if (! $resolution->approve($kill, 'victim')) {
+            return back()->withErrors(['kill' => 'That kill claim could not be approved.']);
+        }
 
         return back();
     }
 
-    public function contest(Request $request): RedirectResponse
+    public function contest(Request $request, KillClaimResolution $resolution): RedirectResponse
     {
         $request->validate([
             'contest_reason' => ['required', 'string', 'max:1000'],
+        ], [
+            'contest_reason.required' => 'Explain why this kill claim is invalid.',
         ]);
 
         $user = Auth::user();
-        if ($user->alive) {
-            return back();
+        if (! $user->alive) {
+            return back()->withErrors(['contest_reason' => 'You have already been eliminated.']);
         }
 
-        $kill = Kill::where('victim_id', $user->id)->firstOrFail();
+        $kill = Kill::query()
+            ->where('victim_id', $user->id)
+            ->where('status', KillStatus::Pending)
+            ->latest()
+            ->first();
 
-        if ($kill->approved) {
-            return back()->withErrors(['contest_reason' => 'This kill has already been approved.']);
+        if (! $kill) {
+            return back()->withErrors(['contest_reason' => 'No pending kill claim is available to contest.']);
         }
 
-        if ($kill->contested) {
-            return back()->withErrors(['contest_reason' => 'You have already contested this kill.']);
+        if (! $resolution->contest($kill, $request->contest_reason, 'victim')) {
+            return back()->withErrors(['contest_reason' => 'That kill claim could not be contested.']);
         }
-
-        $kill->update([
-            'status' => KillStatus::Contested,
-            'contest_reason' => $request->contest_reason,
-        ]);
 
         return back();
+    }
+
+    private function incomingClaimFor(User $user): ?Kill
+    {
+        $query = Kill::with('killer:id,name,nickname')
+            ->where('victim_id', $user->id);
+
+        return $user->alive
+            ? $query->whereIn('status', $this->unresolvedStatusValues())->latest()->first()
+            : $query->where('status', KillStatus::Approved)->latest('resolved_at')->first();
+    }
+
+    private function outgoingClaimFor(User $user): ?Kill
+    {
+        return Kill::with('victim:id,name,nickname')
+            ->where('killer_id', $user->id)
+            ->whereIn('status', $this->unresolvedStatusValues())
+            ->latest()
+            ->first();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function unresolvedStatusValues(): array
+    {
+        return [
+            KillStatus::Pending->value,
+            KillStatus::Contested->value,
+        ];
     }
 }

@@ -1,25 +1,18 @@
 <x-mail::message>
-# Verify this kill report
+# Kill Claim Pending Verification
 
-Hi {{ $victimName }},
+{{ $killerName }} reported eliminating you in NCSSM Forks.
 
-{{ $killerName }} reported that they eliminated you.
+- Submitted: {{ $submittedAtFormatted }}
+- Response deadline: {{ $expiresAtFormatted }}
 
-Please confirm whether this report is valid. If you approve it, your elimination can be processed immediately. If the report is wrong, use the contest link and tell us what happened.
-
-<x-mail::panel>
-Reported by: {{ $killerName }}
-
-Submitted: {{ $submittedAtFormatted ?? 'Recently' }}
-
-Response deadline: {{ $expiresAtFormatted }}
-</x-mail::panel>
+Open the game to approve or contest this claim:
 
 <x-mail::button :url="$reviewUrl">
-View Report
+Review Claim
 </x-mail::button>
 
-If you do nothing, this report will auto-approve at {{ $expiresAtFormatted }}.
+If you do nothing, the claim will auto-approve after the response deadline.
 
 Thanks,<br>
 {{ config('app.name') }}

@@ -17,6 +17,10 @@ class Kill extends Model
         'status',
         'contest_reason',
         'is_ffa',
+        'expires_at',
+        'notification_sent_at',
+        'resolved_at',
+        'resolution_source',
     ];
 
     /**
@@ -27,6 +31,9 @@ class Kill extends Model
         return [
             'status' => KillStatus::class,
             'is_ffa' => 'boolean',
+            'expires_at' => 'datetime',
+            'notification_sent_at' => 'datetime',
+            'resolved_at' => 'datetime',
         ];
     }
 

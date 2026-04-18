@@ -3,21 +3,21 @@
 namespace App\Mail;
 
 use App\Models\Kill;
-use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class PlayerKilled extends Mailable
+class PlayerKilled extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(
-        public Kill $kill,
-        public CarbonInterface $expiresAt,
-    ) {}
+    public function __construct(public Kill $kill)
+    {
+        $this->afterCommit();
+    }
 
     public function envelope(): Envelope
     {
@@ -39,7 +39,7 @@ class PlayerKilled extends Mailable
                 'killerName' => $this->kill->killer->name,
                 'victimName' => $this->kill->victim->name,
                 'submittedAtFormatted' => $this->kill->created_at->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A T'),
-                'expiresAtFormatted' => $this->expiresAt->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A T'),
+                'expiresAtFormatted' => $this->kill->expires_at?->timezone(config('app.timezone'))->format('M j, Y \\a\\t g:i A T'),
                 'reviewUrl' => route('targets'),
             ],
         );

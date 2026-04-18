@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\KillClaimResolution;
 use App\Models\Kill;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -22,47 +23,20 @@ class KillController extends Controller
         ]);
     }
 
-    public function dismiss(Kill $kill): RedirectResponse
+    public function approve(Kill $kill, KillClaimResolution $resolution): RedirectResponse
     {
-        $kill->update([
-            'contested' => false,
-            'contest_reason' => null,
-            'approved' => true,
-        ]);
+        if (! $resolution->approve($kill, 'admin')) {
+            return back()->withErrors(['kill' => 'That kill claim could not be approved.']);
+        }
 
         return back();
     }
 
-    public function revert(Kill $kill): RedirectResponse
+    public function deny(Kill $kill, KillClaimResolution $resolution): RedirectResponse
     {
-        $laterKillExists = Kill::query()
-            ->where('killer_id', $kill->killer_id)
-            ->where('created_at', '>', $kill->created_at)
-            ->exists();
-
-        if ($laterKillExists) {
-            return back()->withErrors(['revert' => 'Cannot revert this kill — the killer has made subsequent kills. Revert those first.']);
+        if (! $resolution->deny($kill, 'admin')) {
+            return back()->withErrors(['kill' => 'That kill claim could not be denied.']);
         }
-
-        $victim = $kill->victim;
-        $killer = $kill->killer;
-
-        $victim->alive = true;
-        $victim->killed_by = null;
-
-        if ($kill->is_ffa) {
-            $victim->save();
-            $killer->total_kills = max(0, $killer->total_kills - 1);
-            $killer->save();
-        } else {
-            $victim->current_target_id = $kill->victim_prev_target_id;
-            $victim->save();
-            $killer->current_target_id = $victim->id;
-            $killer->total_kills = max(0, $killer->total_kills - 1);
-            $killer->save();
-        }
-
-        $kill->delete();
 
         return back();
     }

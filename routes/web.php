@@ -11,7 +11,6 @@ use App\Http\Controllers\LeaderboardController;
 use App\Http\Controllers\StandingsController;
 use App\Mail\PlayerKilled;
 use App\Models\Kill;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
@@ -42,8 +41,8 @@ Route::prefix('admin')->middleware(['auth', 'profile.completed', 'admin'])->grou
     Route::post('/targets/assign', [TargetController::class, 'assignTargets'])->name('targets.assign');
     Route::post('/targets/clear', [TargetController::class, 'clearTargets'])->name('targets.clear');
     Route::get('/kills', [AdminKillController::class, 'index'])->name('kills');
-    Route::delete('/kills/{kill}', [AdminKillController::class, 'revert'])->name('kills.revert');
-    Route::post('/kills/{kill}/dismiss', [AdminKillController::class, 'dismiss'])->name('kills.dismiss');
+    Route::post('/kills/{kill}/approve', [AdminKillController::class, 'approve'])->name('kills.approve');
+    Route::post('/kills/{kill}/deny', [AdminKillController::class, 'deny'])->name('kills.deny');
 });
 
 Route::get('/login', function () {
@@ -68,8 +67,8 @@ Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.go
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 
 Route::get('/test-mail', function () {
-    $kill = Kill::first();
-    Mail::to("kang27m@ncssm.edu")->send(new PlayerKilled($kill, Carbon::now()->addHours(6)));
+    $kill = Kill::with('victim')->firstOrFail();
+    Mail::to($kill->victim->email)->send(new PlayerKilled($kill));
 
     return 'Sent';
 });

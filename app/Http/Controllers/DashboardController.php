@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Kill;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -10,7 +9,7 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    //TODO: Simplify
+    // TODO: Simplify
     public function index(): Response
     {
         $players = User::query()->where('is_admin', false);
@@ -28,7 +27,7 @@ class DashboardController extends Controller
                 'deadliest_hall' => $this->killLeadersByGroup('dorm_location', 'desc'),
                 'deadliest_class' => $this->killLeadersByGroup('grade_year', 'desc'),
                 'quietest_hall' => $this->killLeadersByGroup('dorm_location', 'asc'),
-            ]
+            ],
         ]);
     }
 
@@ -39,7 +38,10 @@ class DashboardController extends Controller
     {
         /** @var object|null $group */
         $group = User::query()
-            ->leftJoin('kills', 'kills.killer_id', '=', 'users.id')
+            ->leftJoin('kills', function ($join): void {
+                $join->on('kills.killer_id', '=', 'users.id')
+                    ->where('kills.status', '=', 'approved');
+            })
             ->where('users.is_admin', false)
             ->selectRaw("
                 COALESCE(NULLIF(TRIM(users.{$column}), ''), 'Unknown') as label,

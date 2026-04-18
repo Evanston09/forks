@@ -74,6 +74,7 @@ export default function Players({
     const playerOptions: PlayerOption[] = players
         .filter((p) => !p.is_admin)
         .map((p) => ({ value: p.id, label: p.name }));
+    const ruleErrors = Object.values(errors);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -137,9 +138,7 @@ export default function Players({
                             </div>
                         )}
 
-                        {errors.player_2 && (
-                            <AlertError errors={[errors.player_2]} />
-                        )}
+                        {ruleErrors.length > 0 && <AlertError errors={ruleErrors} />}
                         <Form
                             {...TargetController.store.form()}
                             resetOnSuccess

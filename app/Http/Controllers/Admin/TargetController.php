@@ -17,13 +17,23 @@ class TargetController extends Controller
             'player_2' => ['required', 'exists:users,id', 'different:player_1'],
         ]);
 
-        $exists = TargetRule::query()
+        if (TargetRule::query()
             ->where('player_1', $validated['player_1'])
             ->where('player_2', $validated['player_2'])
-            ->exists();
-
-        if ($exists) {
+            ->exists()) {
             return back()->withErrors(['player_2' => 'A target rule already exists for these players.']);
+        }
+
+        if (TargetRule::query()
+            ->where('player_1', $validated['player_1'])
+            ->exists()) {
+            return back()->withErrors(['player_1' => 'That player already has a forced target rule.']);
+        }
+
+        if (TargetRule::query()
+            ->where('player_2', $validated['player_2'])
+            ->exists()) {
+            return back()->withErrors(['player_2' => 'That player is already assigned as someone else\'s forced target.']);
         }
 
         TargetRule::create($validated);

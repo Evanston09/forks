@@ -15,7 +15,7 @@ COPY . .
 COPY --from=composer-stage /app/vendor ./vendor
 COPY --from=composer-stage /app/bootstrap/cache ./bootstrap/cache
 
-ARG VITE_APP_NAME=Forks
+ARG VITE_APP_NAME="NCSSM-M Forks"
 ENV VITE_APP_NAME=${VITE_APP_NAME}
 
 RUN npm ci && npm run build

@@ -33,7 +33,6 @@ type Player = {
     email: string;
     phone: string | null;
     dorm_location: string | null;
-    grade_year: string | null;
     alive: boolean;
     total_kills: number;
     is_admin: boolean;
@@ -138,7 +137,9 @@ export default function Players({
                             </div>
                         )}
 
-                        {ruleErrors.length > 0 && <AlertError errors={ruleErrors} />}
+                        {ruleErrors.length > 0 && (
+                            <AlertError errors={ruleErrors} />
+                        )}
                         <Form
                             {...TargetController.store.form()}
                             resetOnSuccess
@@ -234,7 +235,6 @@ export default function Players({
                                     <TableHead>Name</TableHead>
                                     <TableHead>Nickname</TableHead>
                                     <TableHead>Dorm</TableHead>
-                                    <TableHead>Grade</TableHead>
                                     <TableHead>Phone</TableHead>
                                     <TableHead>Target</TableHead>
                                     <TableHead>Kills</TableHead>
@@ -261,9 +261,6 @@ export default function Players({
                                         </TableCell>
                                         <TableCell>
                                             {player.dorm_location ?? '-'}
-                                        </TableCell>
-                                        <TableCell>
-                                            {player.grade_year ?? '-'}
                                         </TableCell>
                                         <TableCell>
                                             {player.phone ?? '-'}

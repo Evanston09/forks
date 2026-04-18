@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\KillStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -25,7 +26,7 @@ class DashboardController extends Controller
             ],
             'superlatives' => [
                 'deadliest_hall' => $this->killLeadersByGroup('dorm_location', 'desc'),
-                'deadliest_class' => $this->killLeadersByGroup('grade_year', 'desc'),
+                'most_kills_overall' => $this->approvedKillsCount(),
                 'quietest_hall' => $this->killLeadersByGroup('dorm_location', 'asc'),
             ],
         ]);
@@ -67,5 +68,12 @@ class DashboardController extends Controller
             'kills' => (int) $group->kills,
             'players' => (int) $group->players,
         ];
+    }
+
+    protected function approvedKillsCount(): int
+    {
+        return DB::table('kills')
+            ->where('status', KillStatus::Approved->value)
+            ->count();
     }
 }

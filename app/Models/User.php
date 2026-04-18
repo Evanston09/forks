@@ -25,7 +25,6 @@ class User extends Authenticatable
         'nickname',
         'phone',
         'dorm_location',
-        'grade_year',
         'profile_completed',
         'is_admin',
         'alive',

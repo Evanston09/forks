@@ -30,7 +30,6 @@ class ProfileController extends Controller
             'nickname' => ['required', 'string', 'max:50'],
             'phone' => ['required', 'string', 'max:20'],
             'dorm_location' => ['required', 'string', Rule::in(['1st South', '2nd South', '3rd South', '4th South', '2nd North', '3rd North', '4th North', '5th North'])],
-            'grade_year' => ['required', 'string', Rule::in(['Junior', 'Senior'])],
         ]);
 
         $user = $request->user();

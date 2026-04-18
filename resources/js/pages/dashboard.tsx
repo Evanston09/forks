@@ -34,11 +34,7 @@ type DashboardProps = {
             kills: number;
             players: number;
         };
-        deadliest_class: {
-            label: string;
-            kills: number;
-            players: number;
-        };
+        most_kills_overall: number;
         quietest_hall: {
             label: string;
             kills: number;
@@ -104,16 +100,16 @@ function SuperlativeCard({
     title,
     label,
     kills,
-    players,
     icon: Icon,
     description,
+    statDescription,
 }: {
     title: string;
     label: string;
     kills: number;
-    players: number;
     icon: LucideIcon;
     description: string;
+    statDescription: string;
 }) {
     return (
         <Card>
@@ -131,8 +127,7 @@ function SuperlativeCard({
             <CardContent className="space-y-1">
                 <p className="text-3xl font-semibold">{kills}</p>
                 <p className="text-sm text-muted-foreground">
-                    {kills === 1 ? 'kill' : 'kills'} from {players}{' '}
-                    {players === 1 ? 'player' : 'players'}
+                    {statDescription}
                 </p>
                 <p className="text-sm text-muted-foreground">{description}</p>
             </CardContent>
@@ -142,7 +137,7 @@ function SuperlativeCard({
 
 export default function Dashboard({ summary, superlatives }: DashboardProps) {
     const { auth } = usePage().props;
-    const greeting = getCurrentGreetingDetails()
+    const greeting = getCurrentGreetingDetails();
 
     const GreetingIcon = greeting.icon;
 
@@ -192,24 +187,24 @@ export default function Dashboard({ summary, superlatives }: DashboardProps) {
                         title="Deadliest Hall"
                         label={superlatives.deadliest_hall.label}
                         kills={superlatives.deadliest_hall.kills}
-                        players={superlatives.deadliest_hall.players}
                         icon={Sword}
+                        statDescription={`${superlatives.deadliest_hall.kills === 1 ? 'kill' : 'kills'} from ${superlatives.deadliest_hall.players} ${superlatives.deadliest_hall.players === 1 ? 'player' : 'players'}`}
                         description="Hall whose players have made the most kills."
                     />
                     <SuperlativeCard
-                        title="Deadliest Class"
-                        label={superlatives.deadliest_class.label}
-                        kills={superlatives.deadliest_class.kills}
-                        players={superlatives.deadliest_class.players}
+                        title="Most Kills Overall"
+                        label="Game-wide"
+                        kills={superlatives.most_kills_overall}
                         icon={Activity}
-                        description="Class year whose players have made the most kills."
+                        statDescription="Approved kills recorded so far."
+                        description="Approved eliminations across the whole game."
                     />
                     <SuperlativeCard
                         title="Quietest Hall"
                         label={superlatives.quietest_hall.label}
                         kills={superlatives.quietest_hall.kills}
-                        players={superlatives.quietest_hall.players}
                         icon={ShieldMinus}
+                        statDescription={`${superlatives.quietest_hall.kills === 1 ? 'kill' : 'kills'} from ${superlatives.quietest_hall.players} ${superlatives.quietest_hall.players === 1 ? 'player' : 'players'}`}
                         description="Hall whose players have made the fewest kills."
                     />
                 </div>

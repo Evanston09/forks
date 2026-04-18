@@ -7,7 +7,6 @@ export type User = {
     nickname?: string | null;
     phone?: string | null;
     dorm_location?: string | null;
-    grade_year?: string | null;
     profile_completed?: boolean;
     alive?: boolean;
     is_admin?: boolean;

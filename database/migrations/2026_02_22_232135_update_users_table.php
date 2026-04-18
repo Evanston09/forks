@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('nickname')->nullable()->after('email');
             $table->string('phone')->nullable()->after('nickname');
             $table->string('dorm_location')->nullable()->after('phone');
-            $table->string('grade_year')->nullable()->after('dorm_location');
-            $table->boolean('profile_completed')->default(false)->after('grade_year');
+            $table->boolean('profile_completed')->default(false)->after('dorm_location');
 
             // Admin & game state
             $table->boolean('is_admin')->default(false)->after('profile_completed');
@@ -43,7 +42,6 @@ return new class extends Migration
                 'nickname',
                 'phone',
                 'dorm_location',
-                'grade_year',
                 'profile_completed',
                 'is_admin',
                 'alive',

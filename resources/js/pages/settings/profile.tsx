@@ -38,8 +38,6 @@ const DORM_LOCATIONS = [
     '5th North',
 ] as const;
 
-const GRADE_YEARS = ['Junior', 'Senior'] as const;
-
 export default function Profile({
     isProfileComplete,
 }: {
@@ -147,33 +145,6 @@ export default function Profile({
                                     <InputError
                                         message={errors.dorm_location}
                                     />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="grade_year">Grade</Label>
-                                    <Select
-                                        name="grade_year"
-                                        defaultValue={String(
-                                            auth.user.grade_year ?? '',
-                                        )}
-                                    >
-                                        <SelectTrigger id="grade_year">
-                                            <SelectValue placeholder="Select your grade" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {GRADE_YEARS.map(
-                                                (currentGradeYear) => (
-                                                    <SelectItem
-                                                        key={currentGradeYear}
-                                                        value={currentGradeYear}
-                                                    >
-                                                        {currentGradeYear}
-                                                    </SelectItem>
-                                                ),
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.grade_year} />
                                 </div>
 
                                 {!isProfileComplete && (

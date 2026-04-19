@@ -36,6 +36,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $game = Game::current();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -43,11 +45,9 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'game' => fn () => [
-                'stage' => Game::current()->stage->value,
-                'stage_label' => Game::current()->stage->label(),
-                'auth_open' => Game::current()->authIsOpen(),
-                'ffa' => Game::current()->ffa,
-                'show_real_names' => Game::current()->show_real_names,
+                'stage' => $game->stage->value,
+                'auth_open' => $game->authIsOpen(),
+                'ffa' => $game->ffa,
                 'start' => config('game.start'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

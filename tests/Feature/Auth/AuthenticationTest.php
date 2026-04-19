@@ -74,7 +74,11 @@ test('no one can sign in through google when auth is closed', function () {
 });
 
 test('existing users can sign in through google when auth is open', function () {
-    Game::current()->update(['stage' => GameStage::Running, 'auth_open' => true]);
+    Game::current()->update([
+        'stage' => GameStage::Running,
+        'auth_open' => true,
+        'seniors_only_signup' => true,
+    ]);
 
     $user = User::factory()->create([
         'google_id' => 'existing-google-id',
@@ -106,4 +110,76 @@ test('existing users can sign in through google when auth is open', function () 
         ->assertRedirect('/dashboard');
 
     $this->assertAuthenticatedAs($user->refresh());
+});
+
+test('non seniors with ncssm emails cannot sign in when seniors only signup is enabled', function () {
+    Game::current()->update([
+        'stage' => GameStage::Running,
+        'auth_open' => true,
+        'seniors_only_signup' => true,
+    ]);
+
+    $googleUser = new class
+    {
+        public function getId(): string
+        {
+            return 'google-456';
+        }
+
+        public function getName(): string
+        {
+            return 'Junior User';
+        }
+
+        public function getEmail(): string
+        {
+            return 'student27@ncssm.edu';
+        }
+    };
+
+    Socialite::shouldReceive('driver->user')->once()->andReturn($googleUser);
+
+    $this->get(route('auth.google.callback'))
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('status', 'Only class of 2026 students can sign up.');
+
+    $this->assertGuest();
+});
+
+test('any ncssm email can sign in when seniors only signup is disabled', function () {
+    Game::current()->update([
+        'stage' => GameStage::Running,
+        'auth_open' => true,
+        'seniors_only_signup' => false,
+    ]);
+
+    $googleUser = new class
+    {
+        public function getId(): string
+        {
+            return 'google-789';
+        }
+
+        public function getName(): string
+        {
+            return 'Junior User';
+        }
+
+        public function getEmail(): string
+        {
+            return 'student27@ncssm.edu';
+        }
+    };
+
+    Socialite::shouldReceive('driver->user')->once()->andReturn($googleUser);
+
+    $this->get(route('auth.google.callback'))
+        ->assertRedirect('/dashboard');
+
+    $user = User::query()->where('google_id', 'google-789')->first();
+
+    expect($user)->not()->toBeNull();
+    expect($user?->email)->toBe('student27@ncssm.edu');
+
+    $this->assertAuthenticatedAs($user);
 });

@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { Toggle } from '@/components/ui/toggle';
 import AppLayout from '@/layouts/app-layout';
 import { game as gameRoute } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
+import type { AdminGameState, BreadcrumbItem } from '@/types';
 
 type GameStats = {
     total: number;
@@ -104,7 +104,7 @@ function ConfirmButton({
 }
 
 export default function Game({ stats }: { stats: GameStats }) {
-    const { game } = usePage().props;
+    const { game } = usePage().props as { game: AdminGameState };
     const currentIndex = STAGES.findIndex((s) => s.value === game.stage);
     const currentStage = STAGES[currentIndex];
     const nextStage = STAGES[(currentIndex + 1) % STAGES.length];
@@ -278,6 +278,37 @@ export default function Game({ stats }: { stats: GameStats }) {
                                 aria-label="Toggle player logins"
                             >
                                 {game.auth_open ? 'On' : 'Off'}
+                            </Toggle>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Separator />
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Seniors Only Signup</CardTitle>
+                        <CardDescription>
+                            Restrict signup to NCSSM emails containing 26. When disabled, any @ncssm.edu address can sign up.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm">
+                                {game.seniors_only_signup
+                                    ? 'Restricted to seniors'
+                                    : 'Open to all NCSSM emails'}
+                            </span>
+                            <Toggle
+                                pressed={game.seniors_only_signup}
+                                onPressedChange={(pressed) =>
+                                    postUpdate({
+                                        seniors_only_signup: pressed,
+                                    })
+                                }
+                                aria-label="Toggle seniors only signup"
+                            >
+                                {game.seniors_only_signup ? 'On' : 'Off'}
                             </Toggle>
                         </div>
                     </CardContent>

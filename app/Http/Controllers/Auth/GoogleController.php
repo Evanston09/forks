@@ -21,38 +21,40 @@ class GoogleController extends Controller
     {
         $game = Game::current();
         $googleUser = Socialite::driver('google')->user();
+        $email = $googleUser->getEmail();
+        $googleId = $googleUser->getId();
 
-        $isAdmin = in_array($googleUser->getEmail(), config('game.admin_emails'));
+        $isAdmin = in_array($email, config('game.admin_emails'));
 
-        if (! $game->authIsOpen() && ! $isAdmin) {
-            return to_route('login')->with('status', 'Logins are currently closed.');
-        }
-
-        if (! str_ends_with($googleUser->getEmail(), '@ncssm.edu')) {
+        if (! str_ends_with($email, '@ncssm.edu')) {
             return to_route('login')->with('status', 'You must use an NCSSM email to log in.');
         }
 
-        if ($game->seniors_only_signup && ! $isAdmin && ! str_contains($googleUser->getEmail(), '26')) {
-            return to_route('login')->with('status', 'Only class of 2026 students can sign up.');
-        }
-
         $user = User::query()
-            ->where('google_id', $googleUser->getId())
-            ->orWhere('email', $googleUser->getEmail())
+            ->where('google_id', $googleId)
+            ->orWhere('email', $email)
             ->first();
 
         if ($user) {
             $user->update([
-                'google_id' => $googleUser->getId(),
+                'google_id' => $googleId,
                 'name' => $googleUser->getName() ?: $user->name,
-                'email' => $googleUser->getEmail() ?: $user->email,
+                'email' => $email ?: $user->email,
                 'is_admin' => $isAdmin,
             ]);
         } else {
+            if (! $game->public_signup_open && ! $isAdmin) {
+                return to_route('login')->with('status', 'Public signup is currently closed.');
+            }
+
+            if ($game->seniors_only_signup && ! $isAdmin && ! str_contains($email, '26')) {
+                return to_route('login')->with('status', 'Only class of 2026 students can sign up.');
+            }
+
             $user = User::create([
-                'google_id' => $googleUser->getId(),
+                'google_id' => $googleId,
                 'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
+                'email' => $email,
                 'is_admin' => $isAdmin,
             ]);
         }

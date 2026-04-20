@@ -20,7 +20,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { dashboard, leaderboard } from '@/routes';
 
 export default function HeroHeader() {
-    const { auth, game } = usePage().props;
+    const { auth } = usePage().props;
     const getInitials = useInitials();
 
     return (
@@ -81,11 +81,11 @@ export default function HeroHeader() {
                             <UserMenuContent user={auth.user} />
                         </DropdownMenuContent>
                     </DropdownMenu>
-                ) : game.auth_open ? (
+                ) : (
                     <Button size="sm" asChild>
                         <Link href="/login">Log in</Link>
                     </Button>
-                ) : null}
+                )}
 
                 <Button
                     variant="outline"
@@ -137,14 +137,14 @@ export default function HeroHeader() {
                                 >
                                     Dashboard
                                 </Link>
-                            ) : game.auth_open ? (
+                            ) : (
                                 <Link
                                     href="/login"
                                     className="text-lg text-zinc-200"
                                 >
                                     Log in
                                 </Link>
-                            ) : null}
+                            )}
                         </nav>
                     </SheetContent>
                 </Sheet>

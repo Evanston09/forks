@@ -12,7 +12,7 @@ class Game extends Model
      */
     protected $fillable = [
         'stage',
-        'auth_open',
+        'public_signup_open',
         'seniors_only_signup',
         'ffa',
         'show_real_names',
@@ -25,7 +25,7 @@ class Game extends Model
     {
         return [
             'stage' => GameStage::class,
-            'auth_open' => 'boolean',
+            'public_signup_open' => 'boolean',
             'seniors_only_signup' => 'boolean',
             'ffa' => 'boolean',
             'show_real_names' => 'boolean',
@@ -35,10 +35,5 @@ class Game extends Model
     public static function current(): self
     {
         return static::query()->firstOrFail();
-    }
-
-    public function authIsOpen(): bool
-    {
-        return $this->auth_open;
     }
 }

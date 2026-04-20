@@ -46,7 +46,6 @@ class HandleInertiaRequests extends Middleware
             ],
             'game' => fn () => [
                 'stage' => $game->stage->value,
-                'auth_open' => $game->authIsOpen(),
                 'ffa' => $game->ffa,
                 'start' => config('game.start'),
             ],

@@ -44,7 +44,7 @@ const STAGES = [
         value: 'pregame',
         label: 'Pregame',
         description:
-            'Set up the game. Open logins so players can register and complete their profiles.',
+            'Set up the game. Open public signup so players can create accounts and complete their profiles.',
         advanceLabel: 'Start Game',
         advanceDescription:
             'This will move the game to the running stage. Make sure targets are assigned.',
@@ -104,7 +104,7 @@ function ConfirmButton({
 }
 
 export default function Game({ stats }: { stats: GameStats }) {
-    const { game } = usePage().props as { game: AdminGameState };
+    const { game } = usePage<{ game: AdminGameState }>().props;
     const currentIndex = STAGES.findIndex((s) => s.value === game.stage);
     const currentStage = STAGES[currentIndex];
     const nextStage = STAGES[(currentIndex + 1) % STAGES.length];
@@ -260,24 +260,24 @@ export default function Game({ stats }: { stats: GameStats }) {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Player Logins</CardTitle>
+                        <CardTitle>Public Signup</CardTitle>
                         <CardDescription>
-                            Allow players to log in and register
+                            Allow first-time public users to create an account
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <span className="text-sm">
-                                {game.auth_open ? 'Open' : 'Closed'}
+                                {game.public_signup_open ? 'Open' : 'Closed'}
                             </span>
                             <Toggle
-                                pressed={game.auth_open}
+                                pressed={game.public_signup_open}
                                 onPressedChange={(pressed) =>
-                                    postUpdate({ auth_open: pressed })
+                                    postUpdate({ public_signup_open: pressed })
                                 }
-                                aria-label="Toggle player logins"
+                                aria-label="Toggle public signup"
                             >
-                                {game.auth_open ? 'On' : 'Off'}
+                                {game.public_signup_open ? 'On' : 'Off'}
                             </Toggle>
                         </div>
                     </CardContent>

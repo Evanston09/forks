@@ -23,7 +23,7 @@ class GameController extends Controller
         return Inertia::render('admin/game', [
             'game' => [
                 'stage' => $game->stage->value,
-                'auth_open' => $game->authIsOpen(),
+                'public_signup_open' => $game->public_signup_open,
                 'seniors_only_signup' => $game->seniors_only_signup,
                 'ffa' => $game->ffa,
                 'show_real_names' => $game->show_real_names,
@@ -41,7 +41,7 @@ class GameController extends Controller
     {
         $validated = $request->validate([
             'stage' => ['sometimes', Rule::enum(GameStage::class)],
-            'auth_open' => ['sometimes', 'boolean'],
+            'public_signup_open' => ['sometimes', 'boolean'],
             'seniors_only_signup' => ['sometimes', 'boolean'],
             'show_real_names' => ['sometimes', 'boolean'],
         ]);

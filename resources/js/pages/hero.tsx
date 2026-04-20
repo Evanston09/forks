@@ -174,17 +174,8 @@ export default function Hero() {
                             {/* Page 9: CTA + Countdown */}
                             <div className="absolute top-[800vh] flex h-screen w-full flex-col items-center justify-center">
                                 <Countdown target={new Date(game.start)} />
-                                <Button
-                                    asChild={game.auth_open}
-                                    disabled={!game.auth_open}
-                                    size="lg"
-                                    className="mt-6"
-                                >
-                                    {game.auth_open ? (
-                                        <Link href="/login">Log in</Link>
-                                    ) : (
-                                        'Logins are currently closed'
-                                    )}
+                                <Button asChild size="lg" className="mt-6">
+                                    <Link href="/login">Log in</Link>
                                 </Button>
                             </div>
 

@@ -21,7 +21,7 @@ export default function Countdown({
     if (timeLeft.total <= 0) {
         return (
             <div className="text-center">
-                <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                <p className="text-sm font-light tracking-wide text-zinc-300 uppercase">
                     The game is
                 </p>
                 <p className="mt-2 text-5xl font-bold tracking-tight text-white sm:text-6xl md:text-8xl">
@@ -33,7 +33,7 @@ export default function Countdown({
 
     return (
         <div className="text-center">
-            <p className="text-xl font-extralight tracking-widest text-zinc-300 uppercase">
+            <p className="text-xl font-light tracking-wide text-zinc-300 uppercase">
                 {label}
             </p>
             <div className="mt-6 flex items-center justify-center gap-3 sm:gap-4 md:gap-6">
@@ -55,7 +55,7 @@ function TimeUnit({ value, label }: { value: number; label: string }) {
             <span className="text-4xl font-bold text-white tabular-nums sm:text-5xl md:text-7xl">
                 {String(value).padStart(2, '0')}
             </span>
-            <span className="mt-2 text-sm font-extralight tracking-wider text-zinc-500 uppercase">
+            <span className="mt-2 text-sm font-light tracking-wide text-zinc-300 uppercase">
                 {label}
             </span>
         </div>

@@ -14,6 +14,7 @@ import Fork from '@/models/fork';
 import ScrambleText from '@/models/scramble-text';
 
 const DAMP = 8; // tweak this to adjust all damping globally
+const DOOR_LIGHT_INTENSITY = 1;
 
 export default function MainScene() {
     const forkRef = useRef<Group>(null!);
@@ -54,7 +55,7 @@ export default function MainScene() {
 
         const fade = 1 - r2;
         setDoorOpacity(fade);
-        rectLightRef.current.intensity = 18 * fade;
+        rectLightRef.current.intensity = DOOR_LIGHT_INTENSITY * fade;
 
         forkRef.current.position.z = MathUtils.damp(
             forkRef.current.position.z,
@@ -130,10 +131,11 @@ export default function MainScene() {
             <fog attach="fog" args={['#0a0a0a', 5, 30]} />
 
             <Door
-                rotation={[Math.PI / 2, Math.PI, 0]}
-                position={[0, -2.9, 0]}
+                position={[-1.3, -.1, 0]}
+                rotation={[0, -Math.PI / 2, 0]}
                 opacity={doorOpacity}
             />
+
             <group ref={forkRef} position={[0, -3, -1.25]}>
                 <Fork />
                 <ScrambleText
@@ -146,7 +148,7 @@ export default function MainScene() {
             <rectAreaLight
                 ref={rectLightRef}
                 color="#b91c1c"
-                intensity={18}
+                intensity={DOOR_LIGHT_INTENSITY}
                 width={4.5}
                 height={0.1}
                 position={[-0.25, -2.9, 0]}

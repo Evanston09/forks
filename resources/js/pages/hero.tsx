@@ -7,6 +7,9 @@ import HeroHeader from '@/components/hero-header';
 import { Button } from '@/components/ui/button';
 import MainScene from '@/scenes/main-scene';
 
+const EYEBROW_TEXT_CLASS =
+    'text-sm font-light tracking-wide text-zinc-300 uppercase';
+
 function HeroTitle() {
     const ref = useRef<HTMLDivElement>(null!);
     const scroll = useScroll();
@@ -21,7 +24,7 @@ function HeroTitle() {
             ref={ref}
             className="pointer-events-none absolute top-0 flex h-screen w-full flex-col items-center justify-center"
         >
-            <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+            <p className={EYEBROW_TEXT_CLASS}>
                 NCSSM Morganton
             </p>
             <h1 className="mt-2 text-7xl leading-none font-bold tracking-tighter text-white uppercase sm:text-8xl md:text-[10rem]">
@@ -48,7 +51,7 @@ export default function Hero() {
 
                             <div className="absolute top-[150vh] flex h-screen w-full items-center justify-center px-8">
                                 <div className="text-center">
-                                    <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                    <p className={EYEBROW_TEXT_CLASS}>
                                         One night, a fork will
                                     </p>
                                     <p className="text-4xl font-bold tracking-tight text-white uppercase sm:text-5xl md:text-7xl">
@@ -59,7 +62,7 @@ export default function Hero() {
 
                             <div className="absolute top-[300vh] flex h-screen w-full items-center justify-center px-8">
                                 <div className="text-center">
-                                    <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                    <p className={EYEBROW_TEXT_CLASS}>
                                         On it —
                                     </p>
                                     <p className="text-4xl font-bold tracking-tight text-white uppercase sm:text-5xl md:text-7xl">
@@ -69,13 +72,13 @@ export default function Hero() {
                             </div>
 
                             <div className="absolute top-[400vh] flex h-screen w-full flex-col items-center justify-center gap-2">
-                                <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                <p className={EYEBROW_TEXT_CLASS}>
                                     Welcome to
                                 </p>
                                 <h1 className="text-8xl leading-none font-bold tracking-tighter text-white uppercase sm:text-9xl md:text-[14rem]">
                                     FORKS
                                 </h1>
-                                <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                <p className={EYEBROW_TEXT_CLASS}>
                                     NCSSM Morganton
                                 </p>
                             </div>
@@ -83,7 +86,7 @@ export default function Hero() {
                             {/* Page 6: How it works */}
                             <div className="absolute top-[500vh] flex h-screen w-full items-center px-6 md:w-1/2 md:px-0 md:pl-16">
                                 <div>
-                                    <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                    <p className={EYEBROW_TEXT_CLASS}>
                                         The rules
                                     </p>
                                     <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
@@ -114,7 +117,7 @@ export default function Hero() {
                             {/* Page 7: Immunity & Safe Zones */}
                             <div className="absolute top-[600vh] flex h-screen w-full items-center px-6 md:w-1/2 md:px-0 md:pl-16">
                                 <div>
-                                    <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                    <p className={EYEBROW_TEXT_CLASS}>
                                         The rules
                                     </p>
                                     <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
@@ -140,7 +143,7 @@ export default function Hero() {
                             {/* Page 8: Safe Zones */}
                             <div className="absolute top-[700vh] flex h-screen w-full items-center px-6 md:w-1/2 md:px-0 md:pl-16">
                                 <div>
-                                    <p className="text-sm font-extralight tracking-widest text-zinc-400 uppercase">
+                                    <p className={EYEBROW_TEXT_CLASS}>
                                         The rules
                                     </p>
                                     <h2 className="mt-2 text-3xl font-bold text-white sm:text-4xl md:text-5xl">
@@ -190,7 +193,7 @@ export default function Hero() {
                             </div>
 
                             <div className="absolute top-[895vh] flex w-full items-center justify-center">
-                                <p className="text-sm font-extralight tracking-widest text-zinc-500">
+                                <p className="text-sm text-zinc-300 text-center">
                                     Built with {'<3'} by{' '}
                                     <a
                                         href="https://evankim.me"
@@ -198,7 +201,8 @@ export default function Hero() {
                                     >
                                         Evan Kim '27
                                     </a>
-                                    .
+                                    <br />
+                                    Models by Hoang Vu
                                 </p>
                             </div>
                         </Scroll>

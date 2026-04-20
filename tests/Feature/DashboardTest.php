@@ -26,7 +26,7 @@ test('admin game page receives admin only game settings props', function () {
     ]);
 
     \App\Models\Game::current()->update([
-        'auth_open' => true,
+        'public_signup_open' => true,
         'seniors_only_signup' => false,
         'show_real_names' => true,
     ]);
@@ -36,7 +36,7 @@ test('admin game page receives admin only game settings props', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/game')
-            ->where('game.auth_open', true)
+            ->where('game.public_signup_open', true)
             ->where('game.seniors_only_signup', false)
             ->where('game.show_real_names', true)
         );

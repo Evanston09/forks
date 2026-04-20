@@ -8,26 +8,24 @@ use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
 
 test('login screen can be rendered', function () {
-
     $response = $this->get(route('login'));
 
     $response
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('auth/login')
-            ->where('game.auth_open', false)
+            ->where('game.stage', GameStage::Pregame->value)
         );
 });
 
-test('login screen reflects closed auth', function () {
-    Game::current()->update(['stage' => GameStage::Running, 'auth_open' => false]);
+test('login screen reflects the current game stage', function () {
+    Game::current()->update(['stage' => GameStage::Running]);
 
     $this->get(route('login'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('auth/login')
             ->where('game.stage', GameStage::Running->value)
-            ->where('game.auth_open', false)
         );
 });
 
@@ -44,8 +42,11 @@ test('users can logout', function () {
     $response->assertRedirect(route('hero'));
 });
 
-test('no one can sign in through google when auth is closed', function () {
-    Game::current()->update(['stage' => GameStage::Running, 'auth_open' => false]);
+test('new users cannot create accounts through google when public signup is closed', function () {
+    Game::current()->update([
+        'stage' => GameStage::Running,
+        'public_signup_open' => false,
+    ]);
 
     $googleUser = new class
     {
@@ -61,28 +62,29 @@ test('no one can sign in through google when auth is closed', function () {
 
         public function getEmail(): string
         {
-            return 'someone@example.com';
+            return 'someone26@ncssm.edu';
         }
     };
 
     Socialite::shouldReceive('driver->user')->once()->andReturn($googleUser);
 
     $this->get(route('auth.google.callback'))
-        ->assertRedirect(route('login'));
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('status', 'Public signup is currently closed.');
 
     $this->assertGuest();
 });
 
-test('existing users can sign in through google when auth is open', function () {
+test('existing users can sign in through google when public signup is closed', function () {
     Game::current()->update([
         'stage' => GameStage::Running,
-        'auth_open' => true,
+        'public_signup_open' => false,
         'seniors_only_signup' => true,
     ]);
 
     $user = User::factory()->create([
         'google_id' => 'existing-google-id',
-        'email' => 'existing26d@ncssm.edu',
+        'email' => 'existing27d@ncssm.edu',
         'profile_completed' => true,
     ]);
 
@@ -100,7 +102,7 @@ test('existing users can sign in through google when auth is open', function () 
 
         public function getEmail(): string
         {
-            return 'existing26d@ncssm.edu';
+            return 'existing27d@ncssm.edu';
         }
     };
 
@@ -112,10 +114,10 @@ test('existing users can sign in through google when auth is open', function () 
     $this->assertAuthenticatedAs($user->refresh());
 });
 
-test('non seniors with ncssm emails cannot sign in when seniors only signup is enabled', function () {
+test('non seniors with ncssm emails cannot create accounts when seniors only signup is enabled', function () {
     Game::current()->update([
         'stage' => GameStage::Running,
-        'auth_open' => true,
+        'public_signup_open' => true,
         'seniors_only_signup' => true,
     ]);
 
@@ -146,10 +148,10 @@ test('non seniors with ncssm emails cannot sign in when seniors only signup is e
     $this->assertGuest();
 });
 
-test('any ncssm email can sign in when seniors only signup is disabled', function () {
+test('any ncssm email can create an account when seniors only signup is disabled', function () {
     Game::current()->update([
         'stage' => GameStage::Running,
-        'auth_open' => true,
+        'public_signup_open' => true,
         'seniors_only_signup' => false,
     ]);
 

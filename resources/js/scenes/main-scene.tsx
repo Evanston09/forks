@@ -2,11 +2,12 @@ import {
     CameraShake,
     Environment,
     Sparkles,
+    SpotLight,
     useScroll,
 } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef, useState } from 'react';
-import type { Group, RectAreaLight } from 'three';
+import { useEffect, useRef, useState } from 'react';
+import type { Group, RectAreaLight, SpotLight as ThreeSpotLight } from 'three';
 import { MathUtils } from 'three';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Door from '@/models/door';
@@ -19,9 +20,18 @@ const DOOR_LIGHT_INTENSITY = 1;
 export default function MainScene() {
     const forkRef = useRef<Group>(null!);
     const rectLightRef = useRef<RectAreaLight>(null!);
+    const spotLightRef = useRef<ThreeSpotLight>(null!);
     const scroll = useScroll();
     const isMobile = useIsMobile();
     const [doorOpacity, setDoorOpacity] = useState(1);
+
+    useEffect(() => {
+        if (!spotLightRef.current || !forkRef.current) {
+            return;
+        }
+
+        spotLightRef.current.target = forkRef.current;
+    }, []);
 
     useFrame((state, delta) => {
         const r1 = scroll.range(0, 2 / 9);
@@ -154,6 +164,15 @@ export default function MainScene() {
                 position={[-0.25, -2.9, 0]}
             />
             <ambientLight intensity={0.12} />
+            <SpotLight
+                ref={spotLightRef}
+                position={[0, 3, 3]}
+                rotation={[0, 0, 0]}
+                distance={5}
+                angle={0.15}
+                attenuation={5}
+                anglePower={5} // Diffuse-cone anglePower (default: 5)
+            />
             <Environment preset="night" environmentIntensity={1.0} />
 
             <Sparkles

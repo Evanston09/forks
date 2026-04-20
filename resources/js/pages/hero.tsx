@@ -24,9 +24,7 @@ function HeroTitle() {
             ref={ref}
             className="pointer-events-none absolute top-0 flex h-screen w-full flex-col items-center justify-center"
         >
-            <p className={EYEBROW_TEXT_CLASS}>
-                NCSSM Morganton
-            </p>
+            <p className={EYEBROW_TEXT_CLASS}>NCSSM Morganton</p>
             <h1 className="mt-2 text-7xl leading-none font-bold tracking-tighter text-white uppercase sm:text-8xl md:text-[10rem]">
                 FORKS
             </h1>
@@ -72,9 +70,7 @@ export default function Hero() {
                             </div>
 
                             <div className="absolute top-[400vh] flex h-screen w-full flex-col items-center justify-center gap-2">
-                                <p className={EYEBROW_TEXT_CLASS}>
-                                    Welcome to
-                                </p>
+                                <p className={EYEBROW_TEXT_CLASS}>Welcome to</p>
                                 <h1 className="text-8xl leading-none font-bold tracking-tighter text-white uppercase sm:text-9xl md:text-[14rem]">
                                     FORKS
                                 </h1>
@@ -193,7 +189,7 @@ export default function Hero() {
                             </div>
 
                             <div className="absolute top-[895vh] flex w-full items-center justify-center">
-                                <p className="text-sm text-zinc-300 text-center">
+                                <p className="text-center text-sm text-zinc-300">
                                     Built with {'<3'} by{' '}
                                     <a
                                         href="https://evankim.me"

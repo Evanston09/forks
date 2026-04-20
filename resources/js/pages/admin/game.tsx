@@ -289,7 +289,8 @@ export default function Game({ stats }: { stats: GameStats }) {
                     <CardHeader>
                         <CardTitle>Seniors Only Signup</CardTitle>
                         <CardDescription>
-                            Restrict signup to NCSSM emails containing 26. When disabled, any @ncssm.edu address can sign up.
+                            Restrict signup to NCSSM emails containing 26. When
+                            disabled, any @ncssm.edu address can sign up.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

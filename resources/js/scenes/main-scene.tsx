@@ -131,7 +131,7 @@ export default function MainScene() {
             <fog attach="fog" args={['#0a0a0a', 5, 30]} />
 
             <Door
-                position={[-1.3, -.1, 0]}
+                position={[-1.3, -0.1, 0]}
                 rotation={[0, -Math.PI / 2, 0]}
                 opacity={doorOpacity}
             />

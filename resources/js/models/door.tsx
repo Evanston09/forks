@@ -5,7 +5,6 @@ Model from Hoang Vu
 
 import { useGLTF } from '@react-three/drei';
 import type { ThreeElements } from '@react-three/fiber';
-import { useEffect } from 'react';
 import type * as THREE from 'three';
 import type { GLTF } from 'three-stdlib';
 
@@ -25,14 +24,6 @@ export default function Door({ opacity = 1, ...props }: DoorProps) {
         '/ncssm_door.glb',
     ) as unknown as GLTFResult;
 
-    useEffect(() => {
-        materials['Material.003'].transparent = true;
-    }, [materials]);
-
-    useEffect(() => {
-        materials['Material.003'].opacity = opacity;
-    }, [materials, opacity]);
-
     return (
         <group {...props} dispose={null}>
             <mesh
@@ -40,6 +31,8 @@ export default function Door({ opacity = 1, ...props }: DoorProps) {
                 receiveShadow
                 geometry={nodes.Cube001.geometry}
                 material={materials['Material.003']}
+                material-opacity={opacity}
+                material-transparent
             />
         </group>
     );

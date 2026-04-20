@@ -1,6 +1,9 @@
 import { Form } from '@inertiajs/react';
 import { useState } from 'react';
-import { approve, contest } from '@/actions/App/Http/Controllers/KillController';
+import {
+    approve,
+    contest,
+} from '@/actions/App/Http/Controllers/KillController';
 import InputError from '@/components/input-error';
 import { ClaimMeta, StateCard } from '@/components/targets/shared';
 import type { KillClaim } from '@/components/targets/types';

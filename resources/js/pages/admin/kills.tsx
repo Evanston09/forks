@@ -56,7 +56,9 @@ export default function Kills({ kills }: { kills: KillRecord[] }) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kills" />
             <div className="flex flex-col gap-6 p-4">
-                {errorList.length > 0 ? <AlertError errors={errorList} /> : null}
+                {errorList.length > 0 ? (
+                    <AlertError errors={errorList} />
+                ) : null}
                 <Card>
                     <CardHeader>
                         <CardTitle>Kill Claims</CardTitle>
@@ -74,7 +76,9 @@ export default function Kills({ kills }: { kills: KillRecord[] }) {
                                             <TableHead>Killer</TableHead>
                                             <TableHead>Victim</TableHead>
                                             <TableHead>Status</TableHead>
-                                            <TableHead>Contest Reason</TableHead>
+                                            <TableHead>
+                                                Contest Reason
+                                            </TableHead>
                                             <TableHead>Submitted</TableHead>
                                             <TableHead>Deadline</TableHead>
                                             <TableHead>Email Sent</TableHead>
@@ -196,9 +200,8 @@ function ClaimActions({ kill }: { kill: KillRecord }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Deny Claim</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will deny the claim and unlock both players
-                            for future submissions without changing gameplay
-                            state.
+                            This will deny the claim and unlock both players for
+                            future submissions without changing gameplay state.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -215,11 +218,7 @@ function ClaimActions({ kill }: { kill: KillRecord }) {
     );
 }
 
-function StatusBadge({
-    status,
-}: {
-    status: KillRecord['status'];
-}) {
+function StatusBadge({ status }: { status: KillRecord['status'] }) {
     if (status === 'approved') {
         return <Badge>Approved</Badge>;
     }

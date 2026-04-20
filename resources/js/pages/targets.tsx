@@ -39,7 +39,9 @@ export default function Targets({
     if (game.stage !== 'running') {
         content = (
             <StateCard
-                title={game.stage === 'pregame' ? 'Game Not Started' : 'Game Over'}
+                title={
+                    game.stage === 'pregame' ? 'Game Not Started' : 'Game Over'
+                }
                 description={
                     game.stage === 'pregame'
                         ? "The game hasn't started yet. Hang tight."
@@ -66,7 +68,9 @@ export default function Targets({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Targets" />
-            <div className="flex flex-1 items-center justify-center p-4">{content}</div>
+            <div className="flex flex-1 items-center justify-center p-4">
+                {content}
+            </div>
         </AppLayout>
     );
 }

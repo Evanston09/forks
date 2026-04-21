@@ -169,7 +169,7 @@ export default function MainScene() {
                 position={[0, 3, 3]}
                 rotation={[0, 0, 0]}
                 distance={5}
-                angle={0.15}
+                angle={0.3}
                 attenuation={5}
                 anglePower={5} // Diffuse-cone anglePower (default: 5)
             />

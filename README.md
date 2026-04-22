@@ -52,6 +52,7 @@ docker compose up
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
 | `ADMIN_EMAILS` | Comma-separated list of admin email addresses |
+| `MAIL_*` | Email configuration |
 | `DB_*` | PostgreSQL connection settings |
 
 ## Game Flow

@@ -16,6 +16,7 @@ class Game extends Model
         'seniors_only_signup',
         'ffa',
         'show_real_names',
+        'rules_pdf_path',
     ];
 
     /**

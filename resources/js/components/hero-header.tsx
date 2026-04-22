@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sheet';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
-import { dashboard, leaderboard } from '@/routes';
+import { dashboard, leaderboard, rules } from '@/routes';
 
 export default function HeroHeader() {
     const { auth } = usePage().props;
@@ -40,7 +40,7 @@ export default function HeroHeader() {
                     </Button>
                     <Button variant="link" size="sm" asChild>
                         <a
-                            href="/forks-game-rules.pdf"
+                            href={rules().url}
                             target="_blank"
                             className="text-white hover:text-white"
                         >
@@ -93,7 +93,7 @@ export default function HeroHeader() {
                     asChild
                     className="sm:hidden"
                 >
-                    <a href="/forks-game-rules.pdf" target="_blank">
+                    <a href={rules().url} target="_blank" rel="noreferrer">
                         Rules
                     </a>
                 </Button>
@@ -124,7 +124,7 @@ export default function HeroHeader() {
                                 Leaderboard
                             </Link>
                             <a
-                                href="/forks-game-rules.pdf"
+                                href={rules().url}
                                 target="_blank"
                                 className="text-lg text-zinc-200"
                             >

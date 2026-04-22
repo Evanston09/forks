@@ -19,6 +19,8 @@ Route::get('/', function () {
 
 Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
 
+Route::get('/rules', [GameController::class, 'rules'])->name('rules');
+
 Route::middleware(['auth', 'profile.completed'])->group(function () {
     Route::get('standings', [StandingsController::class, 'index'])->name('standings');
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -32,6 +34,7 @@ Route::prefix('admin')->middleware(['auth', 'profile.completed', 'admin'])->grou
     Route::get('/players', [UserController::class, 'index'])->name('players');
     Route::get('/game', [GameController::class, 'index'])->name('game');
     Route::post('/game', [GameController::class, 'update'])->name('game.update');
+    Route::post('/game/rules-pdf', [GameController::class, 'updateRulesPdf'])->name('game.rules-pdf.update');
     Route::post('/game/ffa', [GameController::class, 'enableFfa'])->name('game.ffa');
     Route::post('/target-rules', [TargetController::class, 'store'])->name('target-rules.store');
     Route::delete('/target-rules/{targetRule}', [TargetController::class, 'destroy'])->name('target-rules.destroy');

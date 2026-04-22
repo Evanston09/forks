@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    BookOpen,
     Gamepad2,
     LayoutGrid,
     Skull,
@@ -18,7 +19,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, game, kills, players, standings, targets } from '@/routes';
+import { dashboard, game, kills, players, rules, standings, targets } from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 
@@ -37,6 +38,12 @@ const mainNavItems: NavItem[] = [
         title: 'Leaderboard',
         href: standings(),
         icon: Trophy,
+    },
+    {
+        title: 'Rules',
+        href: rules(),
+        icon: BookOpen,
+        external: true,
     },
 ];
 

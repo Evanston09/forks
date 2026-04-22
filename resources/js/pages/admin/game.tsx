@@ -1,9 +1,10 @@
 import type { RequestPayload } from '@inertiajs/core';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Form, Head, router, usePage } from '@inertiajs/react';
 import {
     enableFfa,
     update,
 } from '@/actions/App/Http/Controllers/Admin/GameController';
+import InputError from '@/components/input-error';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,10 +24,14 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Toggle } from '@/components/ui/toggle';
 import AppLayout from '@/layouts/app-layout';
 import { game as gameRoute } from '@/routes';
+import updateRulesPdf from '@/routes/game/rules-pdf';
 import type { AdminGameState, BreadcrumbItem } from '@/types';
 
 type GameStats = {
@@ -200,6 +205,69 @@ export default function Game({ stats }: { stats: GameStats }) {
                         </ConfirmButton>
                     </div>
                 </div>
+
+                <Separator />
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Rules PDF</CardTitle>
+                        <CardDescription>
+                            Replace the site-wide rules document. Every Rules
+                            link will use the latest uploaded PDF.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Form
+                            {...updateRulesPdf.update.form()}
+                            className="flex flex-col gap-3"
+                        >
+                            {({ errors, processing, progress }) => (
+                                <>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="rules_pdf">
+                                            Upload PDF
+                                        </Label>
+                                        {/* TODO: Make this look better */}
+                                        {/* (https://stackoverflow.com/questions/572768/styling-an-input-type-file-button) */}
+                                        <Input
+                                            id="rules_pdf"
+                                            name="rules_pdf"
+                                            type="file"
+                                            accept="application/pdf"
+                                            required
+                                        />
+                                        <InputError
+                                            message={errors.rules_pdf}
+                                        />
+                                    </div>
+
+                                    {progress && (
+                                        <Progress value={progress.percentage} />
+                                    )}
+
+                                    <div className="flex items-center gap-3">
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            Upload Rules PDF
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            variant="outline"
+                                        >
+                                            View Current Rules
+                                        </Button>
+                                        <span className="text-sm text-muted-foreground">
+                                            PDF only, max 10 MB.
+                                        </span>
+                                    </div>
+                                </>
+                            )}
+                        </Form>
+                    </CardContent>
+                </Card>
 
                 <Separator />
 

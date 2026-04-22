@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { rules } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { BreadcrumbItem } from '@/types';
 
@@ -156,7 +157,7 @@ export default function Profile({
                                         <AlertDescription>
                                             Make sure you've read the{' '}
                                             <a
-                                                href="/forks-game-rules.pdf"
+                                                href={rules().url}
                                                 target="_blank"
                                             >
                                                 full game rules

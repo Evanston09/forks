@@ -8,12 +8,30 @@ use App\Models\Game;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\File;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class GameController extends Controller
 {
+    public function rules(): BinaryFileResponse
+    {
+        $game = Game::current();
+        $publicDisk = Storage::disk('public');
+
+        if (filled($game->rules_pdf_path) && $publicDisk->exists($game->rules_pdf_path)) {
+            return response()->file($publicDisk->path($game->rules_pdf_path));
+        }
+
+        $fallbackPath = public_path('forks-game-rules.pdf');
+
+        return response()->file($fallbackPath);
+    }
+
     public function index(): Response
     {
         $game = Game::current();
@@ -27,6 +45,7 @@ class GameController extends Controller
                 'seniors_only_signup' => $game->seniors_only_signup,
                 'ffa' => $game->ffa,
                 'show_real_names' => $game->show_real_names,
+                'rules_pdf_uploaded' => filled($game->rules_pdf_path),
                 'start' => config('game.start'),
             ],
             'stats' => [
@@ -47,6 +66,31 @@ class GameController extends Controller
         ]);
 
         Game::current()->update($validated);
+
+        return to_route('game');
+    }
+
+    public function updateRulesPdf(Request $request): RedirectResponse
+    {
+        $game = Game::current();
+        $validated = $request->validate([
+            'rules_pdf' => [
+                'required',
+                File::types(['pdf'])->max(10 * 1024),
+            ],
+        ], attributes: [
+            'rules_pdf' => 'rules PDF',
+        ]);
+
+        /** @var UploadedFile $rulesPdf */
+        $rulesPdf = $validated['rules_pdf'];
+        $path = $rulesPdf->store('rules', 'public');
+
+        if (filled($game->rules_pdf_path) && Storage::disk('public')->exists($game->rules_pdf_path)) {
+            Storage::disk('public')->delete($game->rules_pdf_path);
+        }
+
+        $game->update(['rules_pdf_path' => $path]);
 
         return to_route('game');
     }

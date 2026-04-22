@@ -31,10 +31,7 @@ export function NavMain({
                             tooltip={{ children: item.title }}
                         >
                             {item.external ? (
-                                <a
-                                    href={toUrl(item.href)}
-                                    target="_blank"
-                                >
+                                <a href={toUrl(item.href)} target="_blank">
                                     {item.icon && <item.icon />}
                                     <span>{item.title}</span>
                                 </a>

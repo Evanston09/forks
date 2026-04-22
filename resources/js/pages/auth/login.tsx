@@ -18,11 +18,7 @@ export default function Login({ status }: { status?: string }) {
                 </Alert>
             ) : null}
             <a href="/auth/google" className="flex justify-center">
-                <img
-                    src={googleSignIn}
-                    alt="Sign in with Google"
-                    height={40}
-                />
+                <img src={googleSignIn} alt="Sign in with Google" height={40} />
             </a>
         </AuthLayout>
     );

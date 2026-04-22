@@ -19,7 +19,15 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard, game, kills, players, rules, standings, targets } from '@/routes';
+import {
+    dashboard,
+    game,
+    kills,
+    players,
+    rules,
+    standings,
+    targets,
+} from '@/routes';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 

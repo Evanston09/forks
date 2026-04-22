@@ -22,14 +22,22 @@ class GameController extends Controller
     {
         $game = Game::current();
         $publicDisk = Storage::disk('public');
+        $headers = [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ];
 
         if (filled($game->rules_pdf_path) && $publicDisk->exists($game->rules_pdf_path)) {
-            return response()->file($publicDisk->path($game->rules_pdf_path));
+            return response()->file(
+                $publicDisk->path($game->rules_pdf_path),
+                $headers,
+            );
         }
 
         $fallbackPath = public_path('forks-game-rules.pdf');
 
-        return response()->file($fallbackPath);
+        return response()->file($fallbackPath, $headers);
     }
 
     public function index(): Response

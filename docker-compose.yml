@@ -1,6 +1,8 @@
 services:
   app:
     env_file: .env
+    volumes:
+      - ./storage/app/public:/var/www/html/storage/app/public
     depends_on:
       db:
         condition: service_healthy
@@ -9,6 +11,8 @@ services:
     image: ghcr.io/evanston09/forks:main
     command: ["php", "/var/www/html/artisan", "schedule:work"]
     stop_signal: SIGTERM
+    volumes:
+      - ./storage/app/public:/var/www/html/storage/app/public
     healthcheck:
       test: ["CMD", "healthcheck-schedule"]
       start_period: 10s

@@ -30,7 +30,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Toggle } from '@/components/ui/toggle';
 import AppLayout from '@/layouts/app-layout';
-import { game as gameRoute } from '@/routes';
+import { game as gameRoute, rules } from '@/routes';
 import updateRulesPdf from '@/routes/game/rules-pdf';
 import type { AdminGameState, BreadcrumbItem } from '@/types';
 
@@ -252,12 +252,14 @@ export default function Game({ stats }: { stats: GameStats }) {
                                         >
                                             Upload Rules PDF
                                         </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            variant="outline"
-                                        >
-                                            View Current Rules
+                                        <Button asChild variant="outline">
+                                            <a
+                                                href={rules().url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                View Current Rules
+                                            </a>
                                         </Button>
                                         <span className="text-sm text-muted-foreground">
                                             PDF only, max 10 MB.

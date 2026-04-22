@@ -1,7 +1,17 @@
 services:
   app:
-    image: ghcr.io/evanston09/forks:main
     env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  task:
+    image: ghcr.io/evanston09/forks:main
+    command: ["php", "/var/www/html/artisan", "schedule:work"]
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "healthcheck-schedule"]
+      start_period: 10s
     depends_on:
       db:
         condition: service_healthy

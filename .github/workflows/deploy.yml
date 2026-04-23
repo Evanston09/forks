@@ -1,13 +1,7 @@
 name: Deploy release
 
-on:
-  workflow_run:
-    workflows: ['Build Docker image']
-    types: [completed]
-
 jobs:
   deploy-release:
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'release'
     runs-on: ubuntu-latest
 
     steps:
@@ -18,4 +12,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          script: cd ~/services && docker compose down forks forks_tasks && docker compose pull forks && docker compose up -d
+          script: cd ~/services && docker compose down forks forks_task && docker compose pull forks && docker compose up -d

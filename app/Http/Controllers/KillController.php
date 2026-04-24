@@ -14,11 +14,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class KillController extends Controller
 {
+    private const int TARGET_GUESS_MAX_ATTEMPTS = 5;
+
+    private const int TARGET_GUESS_DECAY_SECONDS = 3600;
+
     public function index(): Response
     {
         abort_if(Auth::user()->is_admin, 403);
@@ -197,7 +202,18 @@ class KillController extends Controller
                 return;
             }
 
+            $targetGuessKey = 'target-guess:'.$currentKiller->id.':'.$currentKiller->current_target_id;
+            if (RateLimiter::tooManyAttempts($targetGuessKey, self::TARGET_GUESS_MAX_ATTEMPTS)) {
+                $availableIn = RateLimiter::availableIn($targetGuessKey);
+
+                $error = ['verification_name' => 'Too many incorrect guesses. Try again in '.$this->formatRateLimitDelay($availableIn).'.'];
+
+                return;
+            }
+
             if (strtolower(trim($request->verification_name)) !== strtolower(trim($victimsTarget->name))) {
+                RateLimiter::increment($targetGuessKey, self::TARGET_GUESS_DECAY_SECONDS);
+
                 $error = ['verification_name' => 'Incorrect verification name.'];
 
                 return;
@@ -220,6 +236,15 @@ class KillController extends Controller
         });
 
         return $error ? back()->withErrors($error) : back();
+    }
+
+    private function formatRateLimitDelay(int $seconds): string
+    {
+        if ($seconds < 60) {
+            return $seconds.' seconds';
+        }
+
+        return ceil($seconds / 60).' minutes';
     }
 
     public function approve(KillClaimResolution $resolution): RedirectResponse

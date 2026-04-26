@@ -9,9 +9,9 @@ import {
 } from '@/components/targets/status-views';
 import TargetView from '@/components/targets/target-view';
 import type {
-    AlivePlayer,
     KillClaim,
     Target,
+    TargetPagePlayer,
 } from '@/components/targets/types';
 import AppLayout from '@/layouts/app-layout';
 import { targets } from '@/routes';
@@ -25,12 +25,12 @@ export default function Targets({
     target,
     incoming_claim,
     outgoing_claim,
-    alive_players,
+    players,
 }: {
     target: Target | null;
     incoming_claim: KillClaim | null;
     outgoing_claim: KillClaim | null;
-    alive_players: AlivePlayer[];
+    players: TargetPagePlayer[];
 }) {
     const { game, auth } = usePage().props;
     const user = auth.user;
@@ -59,9 +59,9 @@ export default function Targets({
         content = <OutgoingClaimView claim={outgoing_claim} />;
     } else {
         content = game.ffa ? (
-            <FfaTargetView alivePlayers={alive_players} />
+            <FfaTargetView players={players} />
         ) : (
-            <TargetView target={target} />
+            <TargetView target={target} players={players} />
         );
     }
 

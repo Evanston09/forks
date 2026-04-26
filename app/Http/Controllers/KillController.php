@@ -33,20 +33,17 @@ class KillController extends Controller
         $incomingClaim = $this->incomingClaimFor($user);
         $outgoingClaim = $this->outgoingClaimFor($user);
 
-        $alivePlayers = $game->ffa && ! $outgoingClaim
-            ? User::query()
-                ->where('alive', true)
-                ->where('is_admin', false)
-                ->where('id', '!=', $user->id)
-                ->whereNotIn('id', Kill::query()->select('victim_id')->whereIn('status', $this->unresolvedStatusValues()))
-                ->get(['id', 'name', 'nickname'])
-            : [];
+        $players = User::query()
+            ->where('is_admin', false)
+            ->where('id', '!=', $user->id)
+            ->orderBy('name')
+            ->get(['id', 'name', 'nickname', 'alive']);
 
         return Inertia::render('targets', [
             'target' => $outgoingClaim ? null : $user->currentTarget,
             'incoming_claim' => $incomingClaim,
             'outgoing_claim' => $outgoingClaim,
-            'alive_players' => $alivePlayers,
+            'players' => $players,
         ]);
     }
 
@@ -57,18 +54,18 @@ class KillController extends Controller
         $game = Game::current();
 
         if ($game->stage !== GameStage::Running) {
-            return back()->withErrors(['victim_id' => 'The game is not running.', 'verification_name' => 'The game is not running.']);
+            return back()->withErrors(['victim_id' => 'The game is not running.', 'verification_id' => 'The game is not running.']);
         }
 
         $killer = Auth::user();
         if (! $killer->alive) {
-            return back()->withErrors(['victim_id' => 'You are already eliminated.', 'verification_name' => 'You are already eliminated.']);
+            return back()->withErrors(['victim_id' => 'You are already eliminated.', 'verification_id' => 'You are already eliminated.']);
         }
 
         if ($this->outgoingClaimFor($killer)) {
             return back()->withErrors([
                 'victim_id' => 'You already have a kill claim awaiting resolution.',
-                'verification_name' => 'You already have a kill claim awaiting resolution.',
+                'verification_id' => 'You already have a kill claim awaiting resolution.',
             ]);
         }
 
@@ -83,9 +80,9 @@ class KillController extends Controller
         }
 
         $request->validate([
-            'verification_name' => ['required', 'string'],
+            'verification_id' => ['required', 'integer', 'exists:users,id'],
         ], [
-            'verification_name.required' => 'Enter your target\'s next target\'s full name.',
+            'verification_id.required' => 'Choose your target\'s next target.',
         ]);
 
         return $this->storeNormalKill($request, $killer);
@@ -162,19 +159,19 @@ class KillController extends Controller
             $currentKiller = User::query()->find($killer->id);
 
             if (! $currentKiller || ! $currentKiller->alive) {
-                $error = ['verification_name' => 'You are already eliminated.'];
+                $error = ['verification_id' => 'You are already eliminated.'];
 
                 return;
             }
 
             if ($this->outgoingClaimFor($currentKiller)) {
-                $error = ['verification_name' => 'You already have a kill claim awaiting resolution.'];
+                $error = ['verification_id' => 'You already have a kill claim awaiting resolution.'];
 
                 return;
             }
 
             if (! $currentKiller->current_target_id) {
-                $error = ['verification_name' => 'You have no target assigned.'];
+                $error = ['verification_id' => 'You have no target assigned.'];
 
                 return;
             }
@@ -184,20 +181,20 @@ class KillController extends Controller
                 ->find($currentKiller->current_target_id);
 
             if (! $victim || ! $victim->alive) {
-                $error = ['verification_name' => 'Your target has already been eliminated.'];
+                $error = ['verification_id' => 'Your target has already been eliminated.'];
 
                 return;
             }
 
             if ($this->victimHasUnresolvedClaim($victim->id)) {
-                $error = ['verification_name' => 'Your target already has a kill claim awaiting resolution.'];
+                $error = ['verification_id' => 'Your target already has a kill claim awaiting resolution.'];
 
                 return;
             }
 
             $victimsTarget = $victim->currentTarget;
             if (! $victimsTarget) {
-                $error = ['verification_name' => 'Could not verify — target has no next target.'];
+                $error = ['verification_id' => 'Could not verify — target has no next target.'];
 
                 return;
             }
@@ -206,15 +203,15 @@ class KillController extends Controller
             if (RateLimiter::tooManyAttempts($targetGuessKey, self::TARGET_GUESS_MAX_ATTEMPTS)) {
                 $availableIn = RateLimiter::availableIn($targetGuessKey);
 
-                $error = ['verification_name' => 'Too many incorrect guesses. Try again in '.$this->formatRateLimitDelay($availableIn).'.'];
+                $error = ['verification_id' => 'Too many incorrect guesses. Try again in '.$this->formatRateLimitDelay($availableIn).'.'];
 
                 return;
             }
 
-            if (strtolower(trim($request->verification_name)) !== strtolower(trim($victimsTarget->name))) {
+            if ((int) $request->verification_id !== $victimsTarget->id) {
                 RateLimiter::increment($targetGuessKey, self::TARGET_GUESS_DECAY_SECONDS);
 
-                $error = ['verification_name' => 'Incorrect verification name.'];
+                $error = ['verification_id' => 'Incorrect verification target.'];
 
                 return;
             }

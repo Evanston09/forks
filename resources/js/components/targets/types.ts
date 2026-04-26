@@ -24,8 +24,14 @@ export type KillClaim = {
     victim?: ClaimParty;
 };
 
-export type AlivePlayer = {
+export type TargetPagePlayer = {
     id: number;
     name: string;
     nickname: string | null;
+    alive: boolean;
+};
+
+export type PlayerOption = {
+    id: number;
+    name: string;
 };

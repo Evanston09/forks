@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { store as killStore } from '@/actions/App/Http/Controllers/KillController';
 import InputError from '@/components/input-error';
-import type { AlivePlayer } from '@/components/targets/types';
+import type {
+    PlayerOption,
+    TargetPagePlayer,
+} from '@/components/targets/types';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -12,21 +15,26 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from '@/components/ui/combobox';
+import { Label } from '@/components/ui/label';
 
 export default function FfaTargetView({
-    alivePlayers,
+    players,
 }: {
-    alivePlayers: AlivePlayer[];
+    players: TargetPagePlayer[];
 }) {
-    const [victimId, setVictimId] = useState<string>('');
+    const playerOptions: PlayerOption[] = players.map((player) => ({
+        id: player.id,
+        name: player.name,
+    }));
+    const [victim, setVictim] = useState<PlayerOption | null>(null);
     const [showCelebration, setShowCelebration] = useState(false);
     const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
@@ -85,7 +93,7 @@ export default function FfaTargetView({
                         {...killStore.form()}
                         resetOnSuccess
                         onSuccess={() => {
-                            setVictimId('');
+                            setVictim(null);
                             setShowCelebration(true);
                         }}
                         className="flex flex-col gap-4"
@@ -96,30 +104,42 @@ export default function FfaTargetView({
                                     <Label htmlFor="victim_id">
                                         Choose a player to challenge
                                     </Label>
-                                    <Select
+                                    <Combobox
                                         name="victim_id"
-                                        value={victimId}
-                                        onValueChange={setVictimId}
+                                        value={victim}
+                                        onValueChange={setVictim}
+                                        items={playerOptions}
+                                        itemToStringValue={(player) =>
+                                            player.name
+                                        }
                                     >
-                                        <SelectTrigger id="victim_id">
-                                            <SelectValue placeholder="Select a player..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {alivePlayers.map((player) => (
-                                                <SelectItem
-                                                    key={player.id}
-                                                    value={String(player.id)}
-                                                >
-                                                    {player.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        <ComboboxInput
+                                            placeholder="Search players..."
+                                            className="w-full"
+                                        />
+                                        <ComboboxContent>
+                                            <ComboboxEmpty>
+                                                No players found.
+                                            </ComboboxEmpty>
+                                            <ComboboxList>
+                                                {(option) => (
+                                                    <ComboboxItem
+                                                        key={option.id}
+                                                        value={option}
+                                                    >
+                                                        <span className="truncate">
+                                                            {option.name}
+                                                        </span>
+                                                    </ComboboxItem>
+                                                )}
+                                            </ComboboxList>
+                                        </ComboboxContent>
+                                    </Combobox>
                                     <InputError message={errors.victim_id} />
                                 </div>
                                 <Button
                                     type="submit"
-                                    disabled={!victimId || processing}
+                                    disabled={!victim || processing}
                                 >
                                     Submit Kill Claim
                                 </Button>

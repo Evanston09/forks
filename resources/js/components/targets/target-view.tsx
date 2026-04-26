@@ -3,7 +3,11 @@ import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti';
 import { store as killStore } from '@/actions/App/Http/Controllers/KillController';
 import InputError from '@/components/input-error';
-import type { Target } from '@/components/targets/types';
+import type {
+    PlayerOption,
+    Target,
+    TargetPagePlayer,
+} from '@/components/targets/types';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -12,12 +16,30 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from '@/components/ui/combobox';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
-export default function TargetView({ target }: { target: Target | null }) {
-    const [verificationName, setVerificationName] = useState('');
+export default function TargetView({
+    target,
+    players,
+}: {
+    target: Target | null;
+    players: TargetPagePlayer[];
+}) {
+    const playerOptions: PlayerOption[] = players.map((player) => ({
+        id: player.id,
+        name: player.name,
+    }));
+    const [verificationTarget, setVerificationTarget] =
+        useState<PlayerOption | null>(null);
     const [isVisible, setIsVisible] = useState(false);
     const [showCelebration, setShowCelebration] = useState(false);
     const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
@@ -94,7 +116,7 @@ export default function TargetView({ target }: { target: Target | null }) {
                             {...killStore.form()}
                             resetOnSuccess
                             onSuccess={() => {
-                                setVerificationName('');
+                                setVerificationTarget(null);
                                 setShowCelebration(true);
                             }}
                             className="flex flex-col gap-4"
@@ -102,30 +124,51 @@ export default function TargetView({ target }: { target: Target | null }) {
                             {({ errors, processing }) => (
                                 <>
                                     <div className="grid gap-2">
-                                        <Label htmlFor="verification_name">
+                                        <Label htmlFor="verification_id">
                                             Your target&apos;s next
-                                            target&apos;s full name
+                                            target&apos;s player
                                         </Label>
-                                        <Input
-                                            id="verification_name"
-                                            name="verification_name"
-                                            value={verificationName}
-                                            onChange={(event) =>
-                                                setVerificationName(
-                                                    event.target.value,
-                                                )
+                                        <Combobox
+                                            name="verification_id"
+                                            value={verificationTarget}
+                                            onValueChange={
+                                                setVerificationTarget
                                             }
-                                            placeholder="Enter full name to verify"
-                                        />
+                                            items={playerOptions}
+                                            itemToStringValue={(player) =>
+                                                player.name
+                                            }
+                                        >
+                                            <ComboboxInput
+                                                id="verification_id"
+                                                placeholder="Search players..."
+                                                className="w-full"
+                                                showClear
+                                            />
+                                            <ComboboxContent>
+                                                <ComboboxEmpty>
+                                                    No players found.
+                                                </ComboboxEmpty>
+                                                <ComboboxList>
+                                                    {(player) => (
+                                                        <ComboboxItem
+                                                            key={player.id}
+                                                            value={player}
+                                                        >
+                                                            {player.name}
+                                                        </ComboboxItem>
+                                                    )}
+                                                </ComboboxList>
+                                            </ComboboxContent>
+                                        </Combobox>
                                         <InputError
-                                            message={errors.verification_name}
+                                            message={errors.verification_id}
                                         />
                                     </div>
                                     <Button
                                         type="submit"
                                         disabled={
-                                            !verificationName.trim() ||
-                                            processing
+                                            !verificationTarget || processing
                                         }
                                     >
                                         Submit Kill Claim

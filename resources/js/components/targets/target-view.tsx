@@ -135,9 +135,12 @@ export default function TargetView({
                                                 setVerificationTarget
                                             }
                                             items={playerOptions}
-                                            itemToStringValue={(player) =>
-                                                player.name
-                                            }
+                                            itemToStringLabel={(
+                                                player: PlayerOption,
+                                            ) => player.name}
+                                            itemToStringValue={(
+                                                player: PlayerOption,
+                                            ) => String(player.id)}
                                         >
                                             <ComboboxInput
                                                 id="verification_id"

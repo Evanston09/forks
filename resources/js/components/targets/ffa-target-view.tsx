@@ -109,9 +109,12 @@ export default function FfaTargetView({
                                         value={victim}
                                         onValueChange={setVictim}
                                         items={playerOptions}
-                                        itemToStringValue={(player) =>
-                                            player.name
-                                        }
+                                        itemToStringLabel={(
+                                            player: PlayerOption,
+                                        ) => player.name}
+                                        itemToStringValue={(
+                                            player: PlayerOption,
+                                        ) => String(player.id)}
                                     >
                                         <ComboboxInput
                                             placeholder="Search players..."

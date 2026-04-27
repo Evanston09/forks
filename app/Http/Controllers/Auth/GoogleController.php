@@ -25,8 +25,9 @@ class GoogleController extends Controller
         $googleId = $googleUser->getId();
 
         $isAdmin = in_array($email, config('game.admin_emails'));
+        $enforceSignupRestrictions = config('game.enforce_signup_restrictions');
 
-        if (app()->isProduction() && ! str_ends_with($email, '@ncssm.edu')) {
+        if ($enforceSignupRestrictions && ! str_ends_with($email, '@ncssm.edu')) {
             return to_route('login')->with('status', 'You must use an NCSSM email to log in.');
         }
 
@@ -47,7 +48,7 @@ class GoogleController extends Controller
                 return to_route('login')->with('status', 'Public signup is currently closed.');
             }
 
-            if (app()->isProduction() && $game->seniors_only_signup && ! $isAdmin && ! str_contains($email, '26')) {
+            if ($enforceSignupRestrictions && $game->seniors_only_signup && ! $isAdmin && ! str_contains($email, '26')) {
                 return to_route('login')->with('status', 'Only class of 2026 students can sign up.');
             }
 

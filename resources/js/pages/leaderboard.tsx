@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/table';
 
 type Player = {
-    id: number;
     nickname: string | null;
     name: string | null;
     alive: boolean;
@@ -46,7 +45,7 @@ export default function Leaderboard({ players }: { players: Player[] }) {
                     <TableBody>
                         {players.map((player, i) => (
                             <TableRow
-                                key={player.id}
+                                key={i}
                                 className={
                                     player.alive
                                         ? undefined

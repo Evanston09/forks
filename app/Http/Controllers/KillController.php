@@ -35,7 +35,6 @@ class KillController extends Controller
 
         $players = User::query()
             ->where('is_admin', false)
-            ->where('id', '!=', $user->id)
             ->orderBy('name')
             ->get(['id', 'name', 'nickname', 'alive']);
 

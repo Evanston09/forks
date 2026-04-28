@@ -16,11 +16,10 @@ class LeaderboardController extends Controller
         $players = User::query()
             ->where('is_admin', false)
             ->orderByDesc('total_kills')
-            ->get(['id', 'nickname', 'name', 'alive', 'total_kills']);
+            ->get(['nickname', 'name', 'alive', 'total_kills']);
 
         return Inertia::render('leaderboard', [
             'players' => $players->map(fn (User $user) => [
-                'id' => $user->id,
                 'nickname' => $user->nickname,
                 'name' => $game->show_real_names ? $user->name : null,
                 'alive' => $user->alive,

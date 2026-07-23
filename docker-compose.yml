@@ -1,5 +1,7 @@
 services:
   app:
+    image: ghcr.io/evanston09/forks:main
+    pull_policy: always
     env_file: .env
     volumes:
       - ./storage/app/public:/var/www/html/storage/app/public
@@ -9,8 +11,10 @@ services:
 
   task:
     image: ghcr.io/evanston09/forks:main
+    pull_policy: always
     command: ["php", "/var/www/html/artisan", "schedule:work"]
     stop_signal: SIGTERM
+    env_file: .env
     volumes:
       - ./storage/app/public:/var/www/html/storage/app/public
     healthcheck:
@@ -24,13 +28,13 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: forks
-      POSTGRES_PASSWORD: forkspass
-      POSTGRES_DB: forks
+      POSTGRES_USER: ${DB_USERNAME:-forks}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-forkspass}
+      POSTGRES_DB: ${DB_DATABASE:-forks}
     volumes:
       - ./storage/docker/psql:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U forks -d forks"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5

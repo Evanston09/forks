@@ -53,7 +53,7 @@ export default function Leaderboard({ players }: { players: Player[] }) {
                 <Confetti
                     width={viewportSize.width}
                     height={viewportSize.height}
-                    numberOfPieces={500}
+                    recycle={false}
                     style={{ position: 'fixed' }}
                 />
             )}

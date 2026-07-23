@@ -1,18 +1,18 @@
-name: Deploy release
+name: Deploy production
 
 on:
   workflow_dispatch:
 
 jobs:
-  deploy-release:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy new images to VPS
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
-          script: cd ~/services && docker compose down forks forks_task && docker compose pull forks && docker compose up -d
+      - name: Trigger Dokploy deployment
+        run: |
+          curl --fail-with-body -X POST \
+            '${{ secrets.DOKPLOY_URL }}/api/compose.deploy' \
+            -H 'accept: application/json' \
+            -H 'x-api-key: ${{ secrets.DOKPLOY_API_KEY }}' \
+            -H 'Content-Type: application/json' \
+            -d '{"composeId":"${{ secrets.DOKPLOY_COMPOSE_ID }}"}'

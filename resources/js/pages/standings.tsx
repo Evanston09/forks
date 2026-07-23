@@ -1,4 +1,6 @@
 import { Head } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import Confetti from 'react-confetti';
 import { Badge } from '@/components/ui/badge';
 import {
     Table,
@@ -25,6 +27,25 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Standings({ players }: { players: Player[] }) {
+    const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+    const hasWinner =
+        players.length > 1 &&
+        players.filter((player) => player.alive).length === 1;
+
+    useEffect(() => {
+        const updateViewportSize = () => {
+            setViewportSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+
+        updateViewportSize();
+        window.addEventListener('resize', updateViewportSize);
+
+        return () => window.removeEventListener('resize', updateViewportSize);
+    }, []);
+
     function displayName(player: Player) {
         if (player.name && player.nickname) {
             return `${player.nickname} — ${player.name}`;
@@ -35,6 +56,12 @@ export default function Standings({ players }: { players: Player[] }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Leaderboard" />
+            {hasWinner && viewportSize.width > 0 && viewportSize.height > 0 && (
+                <Confetti
+                    width={viewportSize.width}
+                    height={viewportSize.height}
+                />
+            )}
             <div className="mx-auto w-full max-w-2xl px-4 py-6">
                 <Table>
                     <TableHeader>

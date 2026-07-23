@@ -15,6 +15,7 @@ class StandingsController extends Controller
 
         $players = User::query()
             ->where('is_admin', false)
+            ->orderByDesc('alive')
             ->orderByDesc('total_kills')
             ->get(['id', 'nickname', 'name', 'alive', 'total_kills']);
 

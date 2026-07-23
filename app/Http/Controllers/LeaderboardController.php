@@ -15,6 +15,7 @@ class LeaderboardController extends Controller
 
         $players = User::query()
             ->where('is_admin', false)
+            ->orderByDesc('alive')
             ->orderByDesc('total_kills')
             ->get(['nickname', 'name', 'alive', 'total_kills']);
 

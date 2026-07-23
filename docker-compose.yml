@@ -4,7 +4,7 @@ services:
     pull_policy: always
     env_file: .env
     volumes:
-      - ./storage/app/public:/var/www/html/storage/app/public
+      - uploads-data:/var/www/html/storage/app/public
     depends_on:
       db:
         condition: service_healthy
@@ -18,7 +18,7 @@ services:
     environment:
       AUTORUN_ENABLED: "false"
     volumes:
-      - ./storage/app/public:/var/www/html/storage/app/public
+      - uploads-data:/var/www/html/storage/app/public
     healthcheck:
       test: ["CMD", "healthcheck-schedule"]
       start_period: 10s
@@ -43,3 +43,4 @@ services:
 
 volumes:
   postgres-data:
+  uploads-data:

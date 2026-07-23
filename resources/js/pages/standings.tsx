@@ -60,6 +60,8 @@ export default function Standings({ players }: { players: Player[] }) {
                 <Confetti
                     width={viewportSize.width}
                     height={viewportSize.height}
+                    numberOfPieces={500}
+                    style={{ position: 'fixed' }}
                 />
             )}
             <div className="mx-auto w-full max-w-2xl px-4 py-6">
